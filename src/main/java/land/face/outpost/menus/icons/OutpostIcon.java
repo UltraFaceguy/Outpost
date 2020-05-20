@@ -26,6 +26,7 @@ import ninja.amp.ampmenus.events.ItemClickEvent;
 import ninja.amp.ampmenus.items.MenuItem;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
 public class OutpostIcon extends MenuItem {
@@ -51,6 +52,11 @@ public class OutpostIcon extends MenuItem {
   @Override
   public void onItemClick(ItemClickEvent event) {
     super.onItemClick(event);
+    if (event.getClickType() == ClickType.RIGHT) {
+      // Do waypoint
+    } else if (event.getClickType() == ClickType.LEFT) {
+      // Rally logic
+    }
     event.setWillUpdate(false);
     event.setWillClose(false);
   }
