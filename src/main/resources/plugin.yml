@@ -1,0 +1,16 @@
+name: Outpost
+version: 1.0.0
+main: land.face.outpost.OutpostPlugin
+author: Faceguy
+description: Make sum outposts
+depend:
+  - Facecore
+  - Strife
+  - Guilds
+api-version: 1.15
+
+commands:
+  outpost:
+    usage: /<command>
+    aliases: [outpostz]
+    description: outpostsz
