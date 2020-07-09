@@ -1,10 +1,5 @@
 package land.face.outpost.data;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import land.face.outpost.OutpostPlugin;
 import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.boss.BarColor;
@@ -27,13 +22,15 @@ public class Outpost {
   private float life;
   private int minimumCashReward;
   private long protectTime;
+  private String waypoint;
 
   private transient Guild guild;
   private transient OutpostState state;
   private transient BossBar bossBar;
   private transient Long attackAlertDmCooldown = 1L;
   private transient double collectedTaxes;
-  private transient Set<UUID> defenceTeleports = new HashSet<>();
+  private transient boolean canRally;
+  private transient int lastPayment;
 
   public Outpost(String id) {
     this.id = id;
@@ -151,6 +148,14 @@ public class Outpost {
     this.protectTime = protectTime;
   }
 
+  public String getWaypoint() {
+    return waypoint;
+  }
+
+  public void setWaypoint(String waypoint) {
+    this.waypoint = waypoint;
+  }
+
   public Guild getGuild() {
     return guild;
   }
@@ -187,12 +192,20 @@ public class Outpost {
     this.collectedTaxes = collectedTaxes;
   }
 
-  public Set<UUID> getDefenceTeleports() {
-    return defenceTeleports;
+  public boolean isCanRally() {
+    return canRally;
   }
 
-  public void setDefenceTeleports(Set<UUID> defenceTeleports) {
-    this.defenceTeleports = defenceTeleports;
+  public void setCanRally(boolean canRally) {
+    this.canRally = canRally;
+  }
+
+  public int getLastPayment() {
+    return lastPayment;
+  }
+
+  public void setLastPayment(int lastPayment) {
+    this.lastPayment = lastPayment;
   }
 
   public void damage(float amount) {

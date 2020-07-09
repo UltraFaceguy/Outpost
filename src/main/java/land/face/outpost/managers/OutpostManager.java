@@ -26,11 +26,8 @@ import java.util.stream.Collectors;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Outpost.OutpostState;
-import land.face.outpost.data.OutpostComparator;
 import land.face.outpost.data.Position;
 import land.face.outpost.events.OutpostCaptureEvent;
-import me.glaremasters.guilds.Guilds;
-import me.glaremasters.guilds.api.GuildsAPI;
 import me.glaremasters.guilds.guild.Guild;
 import me.glaremasters.guilds.guild.GuildMember;
 import me.glaremasters.guilds.guild.GuildRolePerm;
@@ -43,9 +40,7 @@ public class OutpostManager {
   private OutpostPlugin plugin;
   private Map<String, Outpost> outposts = new HashMap<>();
   private Map<String, String> uniqueIdToOutpost = new HashMap<>();
-  private GuildsAPI api;
   private Gson gson = new Gson();
-  private OutpostComparator outpostComparator = new OutpostComparator();
 
   private TextChannel outpostChannel;
 
@@ -66,8 +61,8 @@ public class OutpostManager {
 
   public OutpostManager(OutpostPlugin plugin) {
     this.plugin = plugin;
-    api = Guilds.getApi();
-    outpostChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("outposts");
+    String channelId = plugin.getSettings().getString("config.outpost-channel-id", "42069");
+    outpostChannel = DiscordUtil.getTextChannelById(channelId);
   }
 
   public Outpost getOutpost(String id) {
@@ -80,14 +75,6 @@ public class OutpostManager {
 
   public List<Outpost> getOutposts() {
     return new ArrayList<>(outposts.values());
-  }
-
-  public List<Outpost> getSortedOutposts(Player player) {
-    List<Outpost> sortOutposts = new ArrayList<>(outposts.values());
-    Guild guild = api.getGuildHandler().getGuild(player);
-    outpostComparator.setGuild(guild);
-    sortOutposts.sort(outpostComparator);
-    return sortOutposts;
   }
 
   public Outpost createOutpost(String name) {
@@ -118,6 +105,7 @@ public class OutpostManager {
       double amount = (double) o.getMinimumCashReward() * payoutRatio;
       amount += o.getCollectedTaxes();
       o.setCollectedTaxes(0);
+      o.setLastPayment((int) amount);
       earnings.put(o.getGuild(), earnings.getOrDefault(o.getGuild(), 0D) + amount);
     }
     for (Guild guild : earnings.keySet()) {
@@ -143,12 +131,14 @@ public class OutpostManager {
       o.getBossBar().setTitle(ChatColor.GOLD + o.getName() + " " + ChatColor.GREEN + "PROTECTED "
           + ChatColor.GOLD + o.getGuild().getName());
       updateBars(o, playersOnOutpost, false);
+      o.setState(OutpostState.PROTECTED);
       return;
     }
 
     if (playersOnOutpost.isEmpty()) {
       o.getBossBar().removeAll();
       o.setBarrier(Math.min(o.getMaxBarrier(), o.getBarrier() + o.getMaxBarrier() / 100));
+      o.setState(OutpostState.OPEN);
       return;
     }
 
@@ -157,6 +147,7 @@ public class OutpostManager {
     if (contestingGuilds.isEmpty()) {
       o.getBossBar().removeAll();
       o.setBarrier(Math.min(o.getMaxBarrier(), o.getBarrier() + o.getMaxBarrier() / 100));
+      o.setState(OutpostState.OPEN);
       return;
     }
 
@@ -280,7 +271,7 @@ public class OutpostManager {
     long protectTime = plugin.getSettings().getLong("config.capture-protection-ms", 82800000L);
     outpost.setProtectTime(System.currentTimeMillis() + protectTime);
     outpost.setAttackAlertDmCooldown(1L);
-    outpost.getDefenceTeleports().clear();
+    outpost.setCanRally(true);
     outpost.setGuildId(newGuild.getId().toString());
     outpost.setGuild(newGuild);
     outpost.getBossBar().setProgress(1);
@@ -356,7 +347,7 @@ public class OutpostManager {
   public Map<Guild, Integer> getGuildsOnOutpost(Outpost outpost, Set<Player> players) {
     Map<Guild, Integer> capPlayerCount = new HashMap<>();
     for (Player p : players) {
-      Guild guild = api.getGuild(p);
+      Guild guild = plugin.getGuildsAPI().getGuild(p);
       if (guild == null) {
         continue;
       }
@@ -390,13 +381,14 @@ public class OutpostManager {
         Outpost outpost = gson.fromJson(e, Outpost.class);
         outpost.buildBar();
         if (outpost.getGuildId() != null) {
-          outpost.setGuild(api.getGuildHandler().getGuild(UUID.fromString(outpost.getGuildId())));
+          outpost.setGuild(plugin.getGuildsAPI().getGuildHandler()
+              .getGuild(UUID.fromString(outpost.getGuildId())));
         } else {
           outpost.setGuild(null);
         }
         outpost.setState(OutpostState.OPEN);
         outpost.setAttackAlertDmCooldown(1L);
-        outpost.setDefenceTeleports(new HashSet<>());
+        outpost.setCanRally(true);
         outposts.put(outpost.getId(), outpost);
       }
     } catch (IOException e) {

@@ -12,16 +12,13 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.tealcube.minecraft.bukkit.bullion.GoldDropEvent;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedSmartYamlConfiguration;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import me.glaremasters.guilds.Guilds;
 import me.glaremasters.guilds.api.GuildsAPI;
-import me.glaremasters.guilds.api.events.GuildLeaveEvent;
 import me.glaremasters.guilds.guild.Guild;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.EventHandler;
@@ -62,9 +59,6 @@ public class CashDropListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void cashDropTax(final GoldDropEvent event) {
-    if (event.isCancelled()) {
-      return;
-    }
     Location loc = event.getLivingEntity().getLocation();
 
     BlockVector3 vectorLoc = at(loc.getX(), loc.getY(), loc.getZ());

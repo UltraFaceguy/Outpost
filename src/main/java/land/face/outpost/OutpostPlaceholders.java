@@ -4,6 +4,7 @@ import com.tealcube.minecraft.bukkit.shade.apache.commons.lang3.StringUtils;
 import land.face.outpost.data.Outpost;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -46,6 +47,32 @@ public class OutpostPlaceholders extends PlaceholderExpansion {
         return ChatColor.GRAY + "<Unowned>";
       }
       return outpost.getGuild().getName();
+    }
+    if (identifier.startsWith("owned")) {
+      Guild guild = plugin.getGuildsAPI().getGuild(p);
+      if (guild == null) {
+        return "0";
+      }
+      int count = 0;
+      for (Outpost o : plugin.getOutpostManager().getOutposts()) {
+        if (o.getGuild() == guild) {
+          count++;
+        }
+      }
+      return Integer.toString(count);
+    }
+    if (identifier.startsWith("income")) {
+      Guild guild = plugin.getGuildsAPI().getGuild(p);
+      if (guild == null) {
+        return "0";
+      }
+      int income = 0;
+      for (Outpost o : plugin.getOutpostManager().getOutposts()) {
+        if (o.getGuild() == guild) {
+          income += o.getLastPayment();
+        }
+      }
+      return Integer.toString(income);
     }
     return null;
   }

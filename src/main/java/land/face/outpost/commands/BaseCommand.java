@@ -3,8 +3,6 @@ package land.face.outpost.commands;
 import static com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils.sendMessage;
 
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
@@ -100,6 +98,18 @@ public class BaseCommand {
     }
     MessageUtils.sendMessage(sender, "Set max barrier to " + amount);
     outpost.setMaxBarrier(amount);
+  }
+
+  @Command(identifier = "outpost setWaypoint", permissions = "outpost.edit", onlyPlayers = false)
+  public void setBarrier(CommandSender sender, @Arg(name = "outpostId") String id,
+      @Arg(name = "waypointId") String waypointId) {
+    Outpost outpost = plugin.getOutpostManager().getOutpost(id);
+    if (outpost == null) {
+      MessageUtils.sendMessage(sender, "specified outpost does not exist");
+      return;
+    }
+    MessageUtils.sendMessage(sender, "Set waypoint to " + waypointId);
+    outpost.setWaypoint(waypointId);
   }
 
   @Command(identifier = "outpost pos1", permissions = "outpost.edit", onlyPlayers = true)

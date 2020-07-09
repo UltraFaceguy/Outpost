@@ -7,6 +7,8 @@ depend:
   - Facecore
   - Strife
   - Guilds
+softdepend:
+  - Waypointer
 api-version: 1.15
 
 commands:

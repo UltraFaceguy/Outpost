@@ -9,12 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import land.face.outpost.commands.BaseCommand;
 import land.face.outpost.listeners.CashDropListener;
-import land.face.outpost.listeners.GuildListener;
 import land.face.outpost.listeners.GuildAlliedMobListener;
+import land.face.outpost.listeners.GuildListener;
 import land.face.outpost.managers.OutpostManager;
 import land.face.outpost.menus.OutpostsMenu;
 import land.face.outpost.tasks.OutpostCaptureTicker;
 import land.face.outpost.tasks.OutpostPayoutTicker;
+import me.glaremasters.guilds.Guilds;
+import me.glaremasters.guilds.api.GuildsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.HandlerList;
@@ -29,9 +31,11 @@ public class OutpostPlugin extends JavaPlugin {
 
   private OutpostManager outpostManager;
 
+  private GuildsAPI guildsAPI;
+  private boolean waypointerEnabled;
+
   private MasterConfiguration settings;
   private VersionedSmartYamlConfiguration configYAML;
-  private OutpostPlaceholders placeholders;
   private CommandHandler commandHandler;
   private OutpostsMenu statusMenu;
 
@@ -41,7 +45,8 @@ public class OutpostPlugin extends JavaPlugin {
 
   public OutpostPlugin() {
     instance = this;
-    placeholders = new OutpostPlaceholders();
+    OutpostPlaceholders placeholders = new OutpostPlaceholders();
+    placeholders.register();
   }
 
   public void onEnable() {
@@ -55,6 +60,9 @@ public class OutpostPlugin extends JavaPlugin {
     }
 
     settings = MasterConfiguration.loadFromFiles(configYAML);
+
+    guildsAPI = Guilds.getApi();
+    waypointerEnabled = Bukkit.getPluginManager().getPlugin("Waypointer") != null;
 
     outpostManager = new OutpostManager(this);
 
@@ -77,6 +85,7 @@ public class OutpostPlugin extends JavaPlugin {
     payoutTicker.runTaskTimer(this, 200L, secondsPerPayout * 20L);
 
     statusMenu = new OutpostsMenu(this);
+    OutpostsMenu.setInstance(statusMenu);
 
     Bukkit.getServer().getLogger().info("Outpost Enabled!");
   }
@@ -94,6 +103,14 @@ public class OutpostPlugin extends JavaPlugin {
 
   public OutpostManager getOutpostManager() {
     return outpostManager;
+  }
+
+  public GuildsAPI getGuildsAPI() {
+    return guildsAPI;
+  }
+
+  public boolean isWaypointerEnabled() {
+    return waypointerEnabled;
   }
 
   private VersionedSmartYamlConfiguration defaultSettingsLoad(String name) {
