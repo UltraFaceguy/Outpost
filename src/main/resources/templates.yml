@@ -1,0 +1,11 @@
+farm-thing:
+  type: GATHER
+  town-id: SNEEDVILLE
+  data-string-one: "apple"
+  data-string-two: "memers"
+  task-amount: 10
+  task-amount-bonus: 10
+  money-reward: 200
+  money-reward-bonus: 100
+  xp-reward: 200
+  xp-reward-bonus: 100

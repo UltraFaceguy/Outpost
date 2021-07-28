@@ -1,0 +1,14 @@
+version: "0.0.1"
+
+outpost-channel-id: 42069
+payout-seconds: 2000
+
+language:
+  command:
+    reload: "&aEconRepair reloaded!"
+    force-menu: "&aForce opened menu for &f{n}"
+  not-enough-money-message: "&cYou don't have enough Bits to repair this!"
+  repair-message: "&aYou repaired an item for &f{a} Bits!"
+  money-remaining-message: "&2Wallet: &f{a} Bits"
+  bank-remaining-message: "&6Bank Balance: &f{a} Bits"
+  already-repaired-message: "&cAlready dun"

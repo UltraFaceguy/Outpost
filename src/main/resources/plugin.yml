@@ -1,0 +1,19 @@
+name: Jobbo
+version: 1.0.0
+main: land.face.jobbo.JobboPlugin
+author: Faceguy
+description: dey tuk our jerbs
+depend:
+  - Facecore
+softdepend:
+  - Waypointer
+  - PlaceholderAPI
+  - Strife
+  - Citizens
+api-version: 1.16
+
+commands:
+  jobbo:
+    usage: /<command>
+    aliases: [job]
+    description: jibs
