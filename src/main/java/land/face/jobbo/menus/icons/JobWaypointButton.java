@@ -27,9 +27,12 @@ import land.face.jobbo.data.Job;
 import land.face.jobbo.data.JobTemplate;
 import land.face.jobbo.menus.BlankIcon;
 import land.face.waypointer.WaypointerPlugin;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import ninja.amp.ampmenus.events.ItemClickEvent;
 import ninja.amp.ampmenus.items.MenuItem;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -50,10 +53,10 @@ public class JobWaypointButton extends MenuItem {
   @Override
   public ItemStack getFinalIcon(Player player) {
     ItemStack stack = new ItemStack(Material.COMPASS);
-    if (!plugin.isWaypointerEnabled()) {
+    if (!JobboPlugin.isWaypointerEnabled()) {
       return BlankIcon.getBlankStack();
     }
-    Job job = plugin.getJobManager().getJob(player);
+    Job job = JobboPlugin.getApi().getJobManager().getJob(player);
     JobTemplate jobTemplate = job.getTemplate();
     if (jobTemplate.getLocation() == null) {
       return BlankIcon.getBlankStack();
@@ -68,10 +71,19 @@ public class JobWaypointButton extends MenuItem {
     super.onItemClick(event);
     event.setWillUpdate(false);
     event.setWillClose(false);
-    if (!plugin.isWaypointerEnabled()) {
+    if (!JobboPlugin.isWaypointerEnabled()) {
       return;
     }
-    Job job = plugin.getJobManager().getJob(event.getPlayer());
+    Job job = JobboPlugin.getApi().getJobManager().getJob(event.getPlayer());
+    if (job.isCompleted() && JobboPlugin.isCitizensEnabled()) {
+      NPC npc = CitizensAPI.getNPCRegistry().getById(job.getTemplate().getCompletionNpc());
+      if (npc != null) {
+        Location wpLoc = npc.getStoredLocation().clone().add(0, 3, 0);
+        WaypointerPlugin.getInstance().getWaypointManager()
+            .setWaypoint(event.getPlayer(), "Job Turn-in", wpLoc);
+        return;
+      }
+    }
     JobTemplate jobTemplate = job.getTemplate();
     if (jobTemplate.getLocation() == null) {
       return;

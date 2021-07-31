@@ -11,12 +11,10 @@ import org.bukkit.entity.Player;
 
 public class JobUtil {
 
-  private static JobboPlugin instance;
   private static final Map<String, String> REGISTERED_JOB_TYPES = new HashMap<>();
   private static final Map<String, String> EXTERNAL_JOB_TYPES = new HashMap<>();
 
-  public static void refreshInstance(JobboPlugin plugin) {
-    instance = plugin;
+  public static void refreshInstance() {
     REGISTERED_JOB_TYPES.clear();
     REGISTERED_JOB_TYPES.put("KILL", "Kill Task");
     REGISTERED_JOB_TYPES.put("GATHER", "Gather Task");
@@ -25,19 +23,17 @@ public class JobUtil {
   }
 
   public static void incrementJobProgress(Player player) {
-    instance.getJobManager().incrementJobProgress(player);
+    JobboPlugin.getApi().getJobManager().incrementJobProgress(player);
   }
 
+  @Deprecated
   public static void bumpTaskProgress(Player player, String type, String dataOne, String dataTwo) {
-    Job job = instance.getJobManager().getJob(player);
+    bumpTaskProgress(player, dataOne, dataTwo);
+  }
+
+  public static void bumpTaskProgress(Player player, String dataOne, String dataTwo) {
+    Job job = JobboPlugin.getApi().getJobManager().getJob(player);
     if (job == null || job.isCompleted()) {
-      return;
-    }
-    Bukkit.getLogger().info("job: " + job.toString());
-    Bukkit.getLogger().info("t: " + type);
-    Bukkit.getLogger().info("d1: " + dataOne);
-    Bukkit.getLogger().info("d2: " + dataTwo);
-    if (!job.getTaskType().equalsIgnoreCase(type)) {
       return;
     }
     if (dataOne != null && !dataOne.equalsIgnoreCase(job.getKeyStringOne())) {
@@ -46,7 +42,7 @@ public class JobUtil {
     if (dataTwo != null && !dataTwo.equalsIgnoreCase(job.getKeyStringTwo())) {
       return;
     }
-    instance.getJobManager().incrementJobProgress(player);
+    JobboPlugin.getApi().getJobManager().incrementJobProgress(player);
   }
 
   public static void registerJobTask(String taskId, String taskDesc) {

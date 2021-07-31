@@ -34,7 +34,7 @@
   </parent>
 
   <artifactId>Jobbo</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <packaging>jar</packaging>
 
   <name>Jobbo</name>
@@ -92,7 +92,7 @@
     <dependency>
       <groupId>io.pixeloutlaw</groupId>
       <artifactId>strife</artifactId>
-      <version>3.2.3</version>
+      <version>3.4.4</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

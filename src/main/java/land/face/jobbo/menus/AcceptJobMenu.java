@@ -47,8 +47,8 @@ public class AcceptJobMenu extends ItemMenu {
   public AcceptJobMenu(JobboPlugin plugin) {
     super(StringExtensionsKt.chatColorize("&0Accept Job?"), Size.fit(27), plugin);
     this.plugin = plugin;
-    setItem(11, new AcceptIcon(plugin));
-    setItem(15, new DeclineIcon(plugin));
+    setItem(11, new AcceptIcon());
+    setItem(15, new DeclineIcon());
     fillEmptySlots(new BlankIcon());
   }
 

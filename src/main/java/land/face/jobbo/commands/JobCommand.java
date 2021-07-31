@@ -23,7 +23,7 @@ public class JobCommand extends BaseCommand {
 
   @Default
   public void baseCommand(Player player) {
-    if (plugin.getJobManager().hasJob(player)) {
+    if (JobboPlugin.getApi().getJobManager().hasJob(player)) {
       plugin.getStatusMenu().open(player);
     } else {
       MessageUtils.sendMessage(player, ChatColor.YELLOW
@@ -39,17 +39,17 @@ public class JobCommand extends BaseCommand {
 
   @Subcommand("refresh")
   public void refresh() {
-    plugin.getJobManager().clearAllBoardJobs();
+    JobboPlugin.getApi().getJobManager().clearAllBoardJobs();
   }
 
   @Subcommand("board add")
   public void addBoard(CommandSender sender, String boardId) {
-    plugin.getJobManager().createBoard(boardId);
+    JobboPlugin.getApi().getJobManager().createBoard(boardId);
   }
 
   @Subcommand("board add location")
   public void addLocation(Player sender, String boardId) {
-    JobBoard jobBoard = plugin.getJobManager().getBoard(boardId);
+    JobBoard jobBoard = JobboPlugin.getApi().getJobManager().getBoard(boardId);
     if (jobBoard == null) {
       MessageUtils.sendMessage(sender, "this board does not exist");
       return;
@@ -61,12 +61,11 @@ public class JobCommand extends BaseCommand {
     }
     MessageUtils.sendMessage(sender, "dun");
     jobBoard.addLocation(block.getLocation());
-    plugin.getJobManager().postJob(jobBoard);
   }
 
   @Subcommand("board add template")
   public void addTemplate(Player sender, String boardId, String templateId) {
-    JobBoard jobBoard = plugin.getJobManager().getBoard(boardId);
+    JobBoard jobBoard = JobboPlugin.getApi().getJobManager().getBoard(boardId);
     if (jobBoard == null) {
       MessageUtils.sendMessage(sender, "this board does not exist");
       return;

@@ -23,14 +23,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class JobBoardTicker extends BukkitRunnable {
 
-  private final JobboPlugin plugin;
-
-  public JobBoardTicker(JobboPlugin plugin) {
-    this.plugin = plugin;
-  }
-
   @Override
   public void run() {
-    plugin.getJobManager().tickListings();
+    JobboPlugin.getApi().getJobManager().tickListings();
   }
 }

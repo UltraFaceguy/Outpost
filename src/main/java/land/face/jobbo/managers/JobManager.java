@@ -2,6 +2,7 @@ package land.face.jobbo.managers;
 
 import com.tealcube.minecraft.bukkit.facecore.utilities.AdvancedActionBarUtil;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
+import com.tealcube.minecraft.bukkit.facecore.utilities.TitleUtils;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonElement;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedSmartYamlConfiguration;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -25,9 +27,13 @@ import land.face.jobbo.data.Job;
 import land.face.jobbo.data.JobBoard;
 import land.face.jobbo.data.JobTemplate;
 import land.face.jobbo.data.PostedJob;
+import land.face.jobbo.events.JobAcceptEvent;
+import land.face.jobbo.events.JobCompleteEvent;
+import land.face.jobbo.events.JobGenerationEvent;
 import land.face.jobbo.util.GsonFactory;
 import land.face.strife.StrifePlugin;
 import land.face.strife.data.champion.LifeSkillType;
+import land.face.strife.util.StatUtil;
 import land.face.waypointer.WaypointerPlugin;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
@@ -40,7 +46,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class JobManager {
 
@@ -49,6 +57,7 @@ public class JobManager {
   private final Map<String, JobTemplate> loadedTemplates = new HashMap<>();
   private final Set<JobBoard> jobBoards = new HashSet<>();
   private final Map<UUID, Job> acceptedJobs = new HashMap<>();
+  private final Map<UUID, Long> abandonCooldown = new HashMap<>();
 
   private final Random random = new Random();
 
@@ -112,6 +121,18 @@ public class JobManager {
     }
   }
 
+  public long getCooldownRemaining(Player player) {
+    return (abandonCooldown.get(player.getUniqueId()) - System.currentTimeMillis()) / 1000;
+  }
+
+  public boolean isNewJobCooldown(Player player) {
+    return abandonCooldown.getOrDefault(player.getUniqueId(), 0L) > System.currentTimeMillis();
+  }
+
+  public void clearJobCooldown(Player player) {
+    abandonCooldown.remove(player.getUniqueId());
+  }
+
   public boolean hasJob(Player player) {
     return acceptedJobs.containsKey(player.getUniqueId());
   }
@@ -148,7 +169,7 @@ public class JobManager {
         awardPlayer(player, job);
         return;
       }
-      if (plugin.isWaypointerEnabled()) {
+      if (JobboPlugin.isWaypointerEnabled()) {
         Location wpLoc = npc.getStoredLocation().clone().add(0, 3, 0);
         WaypointerPlugin.getInstance().getWaypointManager()
             .setWaypoint(player, "Job Turn-in", wpLoc);
@@ -162,6 +183,9 @@ public class JobManager {
   }
 
   public void awardPlayer(Player player, Job job) {
+    JobCompleteEvent jobCompleteEvent = new JobCompleteEvent(player, job);
+    Bukkit.getPluginManager().callEvent(jobCompleteEvent);
+    clearJobCooldown(player);
     if (StringUtils.isNotBlank(job.getTemplate().getCompletionMessage())) {
       MessageUtils.sendMessage(player, job.getTemplate().getCompletionMessage());
     }
@@ -169,18 +193,24 @@ public class JobManager {
         "&2&lJOB COMPLETE! &aWell done! You can now accept a new job at the job board!");
     player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 5, 2);
     acceptedJobs.remove(player.getUniqueId(), job);
-    if (plugin.isStrifeEnabled()) {
-      StrifePlugin.getInstance().getExperienceManager().addExperience(player, job.getXp(), true);
+    if (JobboPlugin.isStrifeEnabled()) {
+      StrifePlugin.getInstance().getExperienceManager().addExperience(
+          player, job.getXp(), true);
       for (LifeSkillType skill : job.getTemplate().getSkillXpReward().keySet()) {
-        StrifePlugin.getInstance().getSkillExperienceManager()
-            .addExperience(player, skill, job.getTemplate().getSkillXpReward().get(skill), true,
-                true);
+        StrifePlugin.getInstance().getSkillExperienceManager().addExperience(
+            player, skill, job.getTemplate().getSkillXpReward().get(skill), true, true);
       }
     } else {
       player.giveExp(job.getXp(), false);
     }
     if (plugin.getEconomy() != null) {
       plugin.getEconomy().depositPlayer(player, job.getMoney());
+    }
+    Map<Integer, ItemStack> remainder = player.getInventory()
+        .addItem(job.getItemRewards().toArray(new ItemStack[0]));
+    for (ItemStack stack : remainder.values()) {
+      Item itemEntity = player.getWorld().dropItemNaturally(player.getLocation(), stack);
+      itemEntity.setOwner(player.getUniqueId());
     }
     // give money
     // give gems
@@ -207,19 +237,36 @@ public class JobManager {
       MessageUtils.sendMessage(player, ChatColor.RED + "Failed to accept! You already have a job!");
       return false;
     }
+    JobAcceptEvent jobAcceptEvent = new JobAcceptEvent(player, job);
+    Bukkit.getPluginManager().callEvent(jobAcceptEvent);
+    if (jobAcceptEvent.isCancelled()) {
+      return false;
+    }
     for (PostedJob postedJob : job.getBoard().getJobListings()) {
       if (postedJob.getJob() == job) {
         acceptedJobs.put(player.getUniqueId(), job);
         postedJob.setJob(null);
         postedJob.setSeconds(315);
         updatePostingSign(job.getBoard(), postedJob);
+        TitleUtils.sendTitle(player,
+            StringExtensionsKt.chatColorize("&2JOB ACCEPTED"),
+            StringExtensionsKt.chatColorize("&eGET THAT BREADDDDD"));
+        MessageUtils.sendMessage(player,
+            "&2&lJOB ACCEPTED! &aCheck &e/job &afor status and waypoints!");
+        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_WORK_CARTOGRAPHER, 5, 1);
+        abandonCooldown.put(player.getUniqueId(), System.currentTimeMillis() + 300000);
+        if (JobboPlugin.isWaypointerEnabled() && job.getTemplate().getLocation() != null) {
+          WaypointerPlugin.getInstance().getWaypointManager().setWaypoint(player,
+              ChatColor.stripColor(job.getTemplate().getJobName()),
+              job.getTemplate().getLocation());
+        }
         return true;
       }
     }
     return false;
   }
 
-  public Job postJob(JobBoard board) {
+  public Job buildJobInstance(JobBoard board, PostedJob postedJob) {
     if (board.getTemplateIds().isEmpty()) {
       Bukkit.getLogger().warning("Board " + board.getId() + " cannot post. No templates!");
       return null;
@@ -231,16 +278,26 @@ public class JobManager {
       templateId = board.getTemplateIds().get(random.nextInt(board.getTemplateIds().size()));
     }
     JobTemplate selectedTemplate = loadedTemplates.get(templateId);
-    return selectedTemplate.generateJobInstance(board);
+    Job job = selectedTemplate.generateJobInstance(board);
+
+    JobGenerationEvent jobGenerationEvent = new JobGenerationEvent(job);
+    Bukkit.getPluginManager().callEvent(jobGenerationEvent);
+    if (jobGenerationEvent.isCancelled()) {
+      if (postedJob != null) {
+        postedJob.setJob(null);
+        postedJob.setSeconds(10);
+      }
+      return null;
+    }
+    return job;
   }
 
   public void tickListings() {
     for (JobBoard board : jobBoards) {
       for (PostedJob postedJob : board.getJobListings()) {
         if (postedJob.getSeconds() == 0) {
-          Job job = postJob(board);
+          Job job = buildJobInstance(board, postedJob);
           if (job == null) {
-            Bukkit.getLogger().warning("Board " + board.getId() + " failed to post a job...");
             continue;
           }
           postedJob.setJob(job);
@@ -324,15 +381,11 @@ public class JobManager {
       jobTemplate.setXpReward(file.getInt(key + ".xp-reward", 0));
       jobTemplate.setBonusXp(file.getInt(key + ".xp-reward-bonus", 0));
       if (plugin.isStrifeEnabled()) {
-        if (file.isConfigurationSection("life-skill-xp")) {
-          for (String skill : file.getConfigurationSection("life-skill-xp").getKeys(false)) {
-            LifeSkillType lifeSkillType;
-            try {
-              lifeSkillType = LifeSkillType.valueOf(skill);
-              jobTemplate.getSkillXpReward()
-                  .put(lifeSkillType, file.getInt("life-skill-type." + skill));
-            } catch (Exception ignored) {
-            }
+        if (file.isConfigurationSection(key + ".life-skill-xp")) {
+          Map<LifeSkillType, Float> skillmap = StatUtil.getSkillMapFromSection(file
+              .getConfigurationSection(key + ".life-skill-xp"));
+          for (Entry<LifeSkillType, Float> entry : skillmap.entrySet()) {
+            jobTemplate.getSkillXpReward().put(entry.getKey(), Math.round(entry.getValue()));
           }
         }
       }

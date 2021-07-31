@@ -1,8 +1,11 @@
 package land.face.jobbo.data;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.inventory.ItemStack;
 
 public class Job {
 
@@ -21,6 +24,8 @@ public class Job {
   @Getter
   @Setter
   private int money, xp;
+  @Getter
+  private final List<ItemStack> itemRewards = new ArrayList<>();
 
   private transient final WeakReference<JobBoard> board;
   private transient final WeakReference<JobTemplate> template;

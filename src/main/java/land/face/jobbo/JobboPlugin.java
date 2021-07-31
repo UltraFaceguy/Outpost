@@ -26,9 +26,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class JobboPlugin extends JavaPlugin {
 
-  private static JobboPlugin instance;
   @Getter
-  private boolean strifeEnabled, citizensEnabled, waypointerEnabled;
+  private static JobboApi api;
+  @Getter
+  public static boolean strifeEnabled, citizensEnabled, waypointerEnabled;
 
   public static final DecimalFormat INT_FORMAT = new DecimalFormat("#,###,###,###,###");
   public static final DecimalFormat ONE_DECIMAL = new DecimalFormat("#,###,###,###,###.#");
@@ -39,19 +40,14 @@ public class JobboPlugin extends JavaPlugin {
   private JobManager jobManager;
 
   private MasterConfiguration settings;
-  private VersionedSmartYamlConfiguration configYAML;
-  private VersionedSmartYamlConfiguration templatesYAML;
 
   private JobsMenu statusMenu;
 
-  public static JobboPlugin getInstance() {
-    return instance;
-  }
-
   public void onEnable() {
     List<VersionedSmartYamlConfiguration> configurations = new ArrayList<>();
+    VersionedSmartYamlConfiguration configYAML;
     configurations.add(configYAML = defaultSettingsLoad("config.yml"));
-    templatesYAML = defaultSettingsLoad("templates.yml");
+    VersionedSmartYamlConfiguration templatesYAML = defaultSettingsLoad("templates.yml");
 
     for (VersionedSmartYamlConfiguration config : configurations) {
       if (config.update()) {
@@ -69,10 +65,10 @@ public class JobboPlugin extends JavaPlugin {
     jobManager.loadBoards();
     jobManager.loadTemplates(templatesYAML);
 
-    Bukkit.getPluginManager().registerEvents(new SignClickListener(this), this);
+    Bukkit.getPluginManager().registerEvents(new SignClickListener(), this);
     Bukkit.getPluginManager().registerEvents(new BuiltInTaskListener(this), this);
     if (citizensEnabled) {
-      Bukkit.getPluginManager().registerEvents(new NpcClickListener(this), this);
+      Bukkit.getPluginManager().registerEvents(new NpcClickListener(), this);
     }
 
     PaperCommandManager commandManager = new PaperCommandManager(this);
@@ -83,7 +79,7 @@ public class JobboPlugin extends JavaPlugin {
       new JobboPlaceholders().register();
     }
 
-    JobBoardTicker boardTicker = new JobBoardTicker(this);
+    JobBoardTicker boardTicker = new JobBoardTicker();
     boardTicker.runTaskTimer(this, 200L, 20L);
 
     AcceptJobMenu acceptMenu = new AcceptJobMenu(this);
@@ -92,9 +88,9 @@ public class JobboPlugin extends JavaPlugin {
     statusMenu = new JobsMenu(this);
     JobsMenu.setInstance(statusMenu);
 
-    JobUtil.refreshInstance(this);
+    JobUtil.refreshInstance();
 
-    instance = this;
+    api = new JobboApi(jobManager);
     Bukkit.getServer().getLogger().info("Jobbo Enabled!");
   }
 
@@ -107,10 +103,6 @@ public class JobboPlugin extends JavaPlugin {
 
   public MasterConfiguration getSettings() {
     return settings;
-  }
-
-  public JobManager getJobManager() {
-    return jobManager;
   }
 
   private void setupEconomy() {

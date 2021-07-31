@@ -30,9 +30,9 @@ public class JobsMenu extends ItemMenu {
 
   public JobsMenu(JobboPlugin plugin) {
     super("Job", Size.fit(27), plugin);
-    setItem(10, new JobInfoIcon(plugin));
+    setItem(10, new JobInfoIcon());
     setItem(13, new JobWaypointButton(plugin));
-    setItem(16, new AbandonJobIcon(plugin));
+    setItem(16, new AbandonJobIcon());
     fillEmptySlots(new BlankIcon());
   }
 

@@ -19,7 +19,6 @@
 package land.face.jobbo.menus.icons;
 
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
-import com.tealcube.minecraft.bukkit.facecore.utilities.TitleUtils;
 import io.pixeloutlaw.minecraft.spigot.garbage.StringExtensionsKt;
 import io.pixeloutlaw.minecraft.spigot.hilt.ItemStackExtensionsKt;
 import java.util.List;
@@ -37,11 +36,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class AcceptIcon extends MenuItem {
 
-  private final JobboPlugin plugin;
-
-  public AcceptIcon(JobboPlugin plugin) {
+  public AcceptIcon() {
     super("", new ItemStack(Material.AIR));
-    this.plugin = plugin;
   }
 
   @Override
@@ -60,7 +56,7 @@ public class AcceptIcon extends MenuItem {
     event.setWillUpdate(false);
     event.setWillClose(true);
 
-    if (plugin.getJobManager().hasJob(event.getPlayer())) {
+    if (JobboPlugin.getApi().getJobManager().hasJob(event.getPlayer())) {
       MessageUtils.sendMessage(event.getPlayer(),
           ChatColor.RED + "Failed to accept! You already have a job!");
     }
@@ -77,10 +73,7 @@ public class AcceptIcon extends MenuItem {
     }
     for (PostedJob postedJob : board.getJobListings()) {
       if (postedJob.getJob() == job) {
-        TitleUtils
-            .sendTitle(event.getPlayer(), "JOB ACCEPTED", "Another day older and deeper in debt");
-        MessageUtils.sendMessage(event.getPlayer(), "WAGE SLAVE DETECTED");
-        plugin.getJobManager().acceptListing(event.getPlayer(), job);
+        JobboPlugin.getApi().getJobManager().acceptListing(event.getPlayer(), job);
         return;
       }
     }

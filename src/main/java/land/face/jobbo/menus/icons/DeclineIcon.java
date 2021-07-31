@@ -19,7 +19,6 @@
 package land.face.jobbo.menus.icons;
 
 import io.pixeloutlaw.minecraft.spigot.hilt.ItemStackExtensionsKt;
-import land.face.jobbo.JobboPlugin;
 import ninja.amp.ampmenus.events.ItemClickEvent;
 import ninja.amp.ampmenus.items.MenuItem;
 import org.bukkit.ChatColor;
@@ -29,11 +28,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class DeclineIcon extends MenuItem {
 
-  private final JobboPlugin plugin;
-
-  public DeclineIcon(JobboPlugin plugin) {
+  public DeclineIcon() {
     super("", new ItemStack(Material.AIR));
-    this.plugin = plugin;
   }
 
   @Override

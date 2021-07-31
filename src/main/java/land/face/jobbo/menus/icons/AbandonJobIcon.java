@@ -33,16 +33,14 @@ import org.bukkit.inventory.ItemStack;
 
 public class AbandonJobIcon extends MenuItem {
 
-  private final JobboPlugin plugin;
   private final List<String> desc = ListExtensionsKt.chatColorize(Arrays.asList(
       "&7Click this to give up on",
       "&7this job so you may accept",
       "&7a new one"
   ));
 
-  public AbandonJobIcon(JobboPlugin plugin) {
+  public AbandonJobIcon() {
     super("", new ItemStack(Material.AIR));
-    this.plugin = plugin;
   }
 
   @Override
@@ -56,8 +54,8 @@ public class AbandonJobIcon extends MenuItem {
   @Override
   public void onItemClick(ItemClickEvent event) {
     super.onItemClick(event);
-    if (plugin.getJobManager().hasJob(event.getPlayer())) {
-      plugin.getJobManager().abandonJob(event.getPlayer());
+    if (JobboPlugin.getApi().getJobManager().hasJob(event.getPlayer())) {
+      JobboPlugin.getApi().getJobManager().abandonJob(event.getPlayer());
       MessageUtils.sendMessage(event.getPlayer(), "Job Abandoned.");
     }
     event.setWillUpdate(false);

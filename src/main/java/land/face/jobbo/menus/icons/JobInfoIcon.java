@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import land.face.jobbo.JobboPlugin;
 import land.face.jobbo.data.Job;
 import land.face.jobbo.data.JobTemplate;
+import land.face.strife.data.champion.LifeSkillType;
 import ninja.amp.ampmenus.events.ItemClickEvent;
 import ninja.amp.ampmenus.items.MenuItem;
 import org.bukkit.ChatColor;
@@ -35,19 +36,17 @@ import org.bukkit.inventory.ItemStack;
 
 public class JobInfoIcon extends MenuItem {
 
-  private final JobboPlugin plugin;
-
-  public JobInfoIcon(JobboPlugin plugin) {
+  public JobInfoIcon() {
     super("", new ItemStack(Material.AIR));
-    this.plugin = plugin;
   }
 
   @Override
   public ItemStack getFinalIcon(Player player) {
     ItemStack stack = new ItemStack(Material.PAPER);
-    Job job = plugin.getJobManager().getJob(player);
+    Job job = JobboPlugin.getApi().getJobManager().getJob(player);
     List<String> lore = buildCoreLore(stack, job);
-    lore.add(StringExtensionsKt.chatColorize("&b&lProgress: &f[ " + job.getProgress() + "/" + job.getProgressCap() + " ]"));
+    lore.add(StringExtensionsKt.chatColorize(
+        "&b&lProgress: &f[ " + job.getProgress() + "/" + job.getProgressCap() + " ]"));
     ItemStackExtensionsKt.setLore(stack, lore);
     return stack;
   }
@@ -70,11 +69,22 @@ public class JobInfoIcon extends MenuItem {
         .collect(Collectors.toList()));
     lore.add("");
     lore.add(StringExtensionsKt.chatColorize("&a&lRewards:"));
-    if (job.getMoney() > 0) {
-      lore.add(StringExtensionsKt.chatColorize("&e " + job.getMoney() + "◎"));
+    for (ItemStack rewardItem : job.getItemRewards()) {
+      String amount = "&b" + rewardItem.getAmount() + "x ";
+      String name = ItemStackExtensionsKt.getDisplayName(rewardItem);
+      lore.add(StringExtensionsKt.chatColorize(amount + name));
+    }
+    if (JobboPlugin.isStrifeEnabled() && !jobTemplate.getSkillXpReward().isEmpty()) {
+      for (LifeSkillType lifeSkillType : jobTemplate.getSkillXpReward().keySet()) {
+        lore.add(lifeSkillType.getColor() + " " + jobTemplate.getSkillXpReward()
+            .get(lifeSkillType) + " " + lifeSkillType.getName() + " XP");
+      }
     }
     if (job.getXp() > 0) {
-      lore.add(StringExtensionsKt.chatColorize("&a " + job.getXp() + "XP"));
+      lore.add(StringExtensionsKt.chatColorize("&a " + job.getXp() + " Combat XP"));
+    }
+    if (job.getMoney() > 0) {
+      lore.add(StringExtensionsKt.chatColorize("&e " + job.getMoney() + "◎"));
     }
     // TODO: gems
     if (true == false) {
