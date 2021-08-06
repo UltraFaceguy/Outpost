@@ -22,27 +22,28 @@ public class JobUtil {
     REGISTERED_JOB_TYPES.putAll(EXTERNAL_JOB_TYPES);
   }
 
-  public static void incrementJobProgress(Player player) {
-    JobboPlugin.getApi().getJobManager().incrementJobProgress(player);
-  }
-
   @Deprecated
-  public static void bumpTaskProgress(Player player, String type, String dataOne, String dataTwo) {
-    bumpTaskProgress(player, dataOne, dataTwo);
+  public static boolean bumpTaskProgress(Player player, String type, String dataOne, String dataTwo) {
+    return bumpTaskProgress(player, dataOne, dataTwo);
   }
 
-  public static void bumpTaskProgress(Player player, String dataOne, String dataTwo) {
+  public static boolean bumpTaskProgress(Player player, String dataOne, String dataTwo) {
+    return bumpTaskProgress(player, dataOne, dataTwo, 1);
+  }
+
+  public static boolean bumpTaskProgress(Player player, String dataOne, String dataTwo, int amount) {
     Job job = JobboPlugin.getApi().getJobManager().getJob(player);
     if (job == null || job.isCompleted()) {
-      return;
+      return false;
     }
     if (dataOne != null && !dataOne.equalsIgnoreCase(job.getKeyStringOne())) {
-      return;
+      return false;
     }
     if (dataTwo != null && !dataTwo.equalsIgnoreCase(job.getKeyStringTwo())) {
-      return;
+      return false;
     }
-    JobboPlugin.getApi().getJobManager().incrementJobProgress(player);
+    JobboPlugin.getApi().getJobManager().incrementJobProgress(player, amount);
+    return true;
   }
 
   public static void registerJobTask(String taskId, String taskDesc) {

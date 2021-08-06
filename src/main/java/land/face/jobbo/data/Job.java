@@ -49,7 +49,12 @@ public class Job {
   }
 
   public boolean addOne() {
-    progress++;
+    return increment(1);
+  }
+
+  public boolean increment(int amount) {
+    progress += amount;
+    progress = Math.min(progressCap, progress);
     return isCompleted();
   }
 

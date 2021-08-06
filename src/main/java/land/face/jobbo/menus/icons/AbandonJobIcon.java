@@ -18,7 +18,6 @@
  */
 package land.face.jobbo.menus.icons;
 
-import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
 import io.pixeloutlaw.minecraft.spigot.garbage.ListExtensionsKt;
 import io.pixeloutlaw.minecraft.spigot.hilt.ItemStackExtensionsKt;
 import java.util.Arrays;
@@ -56,7 +55,6 @@ public class AbandonJobIcon extends MenuItem {
     super.onItemClick(event);
     if (JobboPlugin.getApi().getJobManager().hasJob(event.getPlayer())) {
       JobboPlugin.getApi().getJobManager().abandonJob(event.getPlayer());
-      MessageUtils.sendMessage(event.getPlayer(), "Job Abandoned.");
     }
     event.setWillUpdate(false);
     event.setWillClose(true);

@@ -40,6 +40,9 @@ public class JobTemplate {
   @Setter
   private String jobName;
   @Getter
+  @Setter
+  private double rerollChance;
+  @Getter
   private final List<String> description = new ArrayList<>();
 
   @Getter

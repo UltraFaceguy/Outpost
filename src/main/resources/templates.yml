@@ -1,11 +1,24 @@
-farm-thing:
-  type: GATHER
-  town-id: SNEEDVILLE
-  data-string-one: "apple"
-  data-string-two: "memers"
-  task-amount: 10
-  task-amount-bonus: 10
-  money-reward: 200
-  money-reward-bonus: 100
-  xp-reward: 200
-  xp-reward-bonus: 100
+garbage1:
+  type: JOB
+  town-id: none
+  name: "&eAcceptane"
+  description:
+    - "&c&lObjective :"
+    - " &cAbandon &f1 &cjob"
+    - ""
+    - "&6&lDetails:"
+    - " &e   it has to be done by you"
+    - " &4&obefore somebody else does."
+    - ""
+    - "&2&lJob Pos&e&lt&a&ler:"
+    - " &7ＬＯＯＫ ＷＩＴＨＩＮ ＦＯＲ ＴＨＥ ＡＮＳＷＥＲＳ"
+  difficulty: 1
+  reroll-chance: 0.9
+  data-string-one: "job_abandon"
+  completion-message: "&6&lTASK SUCCESSFULLY FAILED  TASK SUCCESSFULLY FAILED  TASK SUCCESSFULLY FAILED  JO B  TASK SUCCESSFULLY FAILED  TASK SUCCESSFULLY FAILED  JOB TASK SUCCESSFULLY FAILED  TASK SUCCESSFULLY FAILED  TASK SUCCESSFULLY FAILED  TASK FAILED SUCCESSFULLY FAILED      TASK FAILED SUCCESSFULLY FAILED      TASK FAILED SUCCESSFULLY FAILED      TASK FAILED SUCCESSFULLYY      "
+  task-amount: 1
+  task-amount-bonus: 0
+  money-reward: 0
+  money-reward-bonus: 0
+  life-skill-xp:
+    FARMING: 4

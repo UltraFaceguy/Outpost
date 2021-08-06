@@ -20,13 +20,12 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import land.face.jobbo.JobboPlugin;
 import land.face.jobbo.data.Job;
 import land.face.jobbo.data.JobBoard;
 import land.face.jobbo.data.JobTemplate;
 import land.face.jobbo.data.PostedJob;
+import land.face.jobbo.events.JobAbandonEvent;
 import land.face.jobbo.events.JobAcceptEvent;
 import land.face.jobbo.events.JobCompleteEvent;
 import land.face.jobbo.events.JobGenerationEvent;
@@ -38,6 +37,7 @@ import land.face.waypointer.WaypointerPlugin;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang.StringUtils;
@@ -61,13 +61,42 @@ public class JobManager {
 
   private final Random random = new Random();
 
-  private final List<TextColor> difficultyColor = Arrays.asList(
-      TextColor.color(196, 255, 77),
-      TextColor.color(255, 255, 77),
-      TextColor.color(255, 195, 77),
-      TextColor.color(255, 136, 77),
-      TextColor.color(255, 77, 77)
+  private final List<TextComponent> starRating = Arrays.asList(
+      Component.text("✦✦✦✦✦").color(TextColor.color(0, 0, 0)),
+      Component.text("✦").color(TextColor.color(	67, 214, 35)).append(
+          Component.text("✦✦✦✦").color(TextColor.color(0, 0, 0))
+      ),
+      Component.text("✦✦").color(TextColor.color(171, 214, 35)).append(
+          Component.text("✦✦✦").color(TextColor.color(0, 0, 0))
+      ),
+      Component.text("✦✦✦").color(TextColor.color(222, 193, 53)).append(
+          Component.text("✦✦").color(TextColor.color(0, 0, 0))
+      ),
+      Component.text("✦✦✦✦").color(TextColor.color(		214, 109, 35)).append(
+          Component.text("✦").color(TextColor.color(0, 0, 0))
+      ),
+      Component.text("✦✦✦✦✦").color(TextColor.color(255, 77, 77))
   );
+  private final List<TextComponent> timeLeft = Arrays.asList(
+      Component.text("Time Left: 0m").color(TextColor.color(0, 228, 217)),
+      Component.text("Time Left: 1m").color(TextColor.color(0, 128, 255)),
+      Component.text("Time Left: 2m").color(TextColor.color(0, 128, 255)),
+      Component.text("Time Left: 3m").color(TextColor.color(0, 128, 255)),
+      Component.text("Time Left: 4m").color(TextColor.color(0, 128, 255)),
+      Component.text("Time Left: 5m").color(TextColor.color(0, 128, 255))
+  );
+  private final List<TextComponent> newJob = Arrays.asList(
+      Component.text("New Job: 0m").color(TextColor.color(0, 128, 255)),
+      Component.text("New Job: 1m").color(TextColor.color(0, 128, 255)),
+      Component.text("New Job: 2m").color(TextColor.color(0, 128, 255)),
+      Component.text("New Job: 3m").color(TextColor.color(0, 128, 255)),
+      Component.text("New Job: 4m").color(TextColor.color(0, 128, 255)),
+      Component.text("New Job: 5m").color(TextColor.color(0, 128, 255))
+  );
+  private final TextComponent jobAccepted = Component.text("[JOB ACCEPTED]")
+      .color(TextColor.color(142, 34, 17)).decoration(TextDecoration.BOLD, true);
+  private final TextComponent clickForInfo = Component.text("[Click For Info!]")
+      .color(TextColor.color(255, 230, 255));
 
   public JobManager(JobboPlugin plugin) {
     this.plugin = plugin;
@@ -138,6 +167,15 @@ public class JobManager {
   }
 
   public void abandonJob(Player player) {
+    if (!acceptedJobs.containsKey(player.getUniqueId())) {
+      return;
+    }
+    JobAbandonEvent event = new JobAbandonEvent(player, acceptedJobs.get(player.getUniqueId()));
+    Bukkit.getPluginManager().callEvent(event);
+    if (event.isCancelled()) {
+      return;
+    }
+    MessageUtils.sendMessage(event.getPlayer(), "&eJob Abandoned!");
     acceptedJobs.remove(player.getUniqueId());
   }
 
@@ -146,10 +184,10 @@ public class JobManager {
     return acceptedJobs.get(player.getUniqueId());
   }
 
-  public void incrementJobProgress(Player player) {
+  public void incrementJobProgress(Player player, int amount) {
     Job job = acceptedJobs.get(player.getUniqueId());
     if (job != null) {
-      boolean complete = job.addOne();
+      boolean complete = job.increment(amount);
       if (!complete) {
         AdvancedActionBarUtil.addOverrideMessage(player, "JOB-UPDATE",
             "&aJOB [" + job.getProgress() + "/" + job.getProgressCap() + "]", 30);
@@ -278,6 +316,10 @@ public class JobManager {
       templateId = board.getTemplateIds().get(random.nextInt(board.getTemplateIds().size()));
     }
     JobTemplate selectedTemplate = loadedTemplates.get(templateId);
+    while (Math.random() < selectedTemplate.getRerollChance()) {
+      templateId = board.getTemplateIds().get(random.nextInt(board.getTemplateIds().size()));
+      selectedTemplate = loadedTemplates.get(templateId);
+    }
     Job job = selectedTemplate.generateJobInstance(board);
 
     JobGenerationEvent jobGenerationEvent = new JobGenerationEvent(job);
@@ -319,24 +361,16 @@ public class JobManager {
     sign.setEditable(true);
     if (postedJob.getJob() == null) {
       sign.line(0, Component.text(""));
-      sign.line(1, Component.text("[JOB ACCEPTED]").color(TextColor
-          .color(142, 34, 17)).decoration(TextDecoration.BOLD, true));
-      int mins = (int) Math.round((double) postedJob.getSeconds() / 60);
-      sign.line(2, Component.text("New Job: " + mins + "m")
-          .color(TextColor.color(0, 128, 255)));
+      sign.line(1, jobAccepted);
+      sign.line(2, newJob.get((int) Math.round((double) postedJob.getSeconds() / 60)));
       sign.line(3, Component.text(""));
     } else {
       JobTemplate template = postedJob.getJob().getTemplate();
-      String starz = IntStream.range(0, template.getDifficulty())
-          .mapToObj(i -> "✦").collect(Collectors.joining(""));
       sign.line(0, Component.text(postedJob.getJob().getTaskType() + " JOB")
           .color(TextColor.color(0, 204, 0)).decoration(TextDecoration.BOLD, true));
-      sign.line(1, Component.text(starz)
-          .color(difficultyColor.get(template.getDifficulty() - 1)));
-      sign.line(2, Component.text("Time Left: " + (postedJob.getSeconds() / 60) + "m")
-          .color(TextColor.color(0, 128, 255)));
-      sign.line(3, Component.text("[Click For Info!]")
-          .color(TextColor.color(255, 230, 255)));
+      sign.line(1, starRating.get(template.getDifficulty()));
+      sign.line(2, timeLeft.get((int) Math.round((double) postedJob.getSeconds() / 60)));
+      sign.line(3, clickForInfo);
     }
     sign.setEditable(false);
     sign.update();
@@ -380,7 +414,7 @@ public class JobManager {
       jobTemplate.setBonusMoney(file.getInt(key + ".money-reward-bonus", 0));
       jobTemplate.setXpReward(file.getInt(key + ".xp-reward", 0));
       jobTemplate.setBonusXp(file.getInt(key + ".xp-reward-bonus", 0));
-      if (plugin.isStrifeEnabled()) {
+      if (JobboPlugin.isStrifeEnabled()) {
         if (file.isConfigurationSection(key + ".life-skill-xp")) {
           Map<LifeSkillType, Float> skillmap = StatUtil.getSkillMapFromSection(file
               .getConfigurationSection(key + ".life-skill-xp"));
@@ -394,6 +428,8 @@ public class JobManager {
       jobTemplate.setX(file.getDouble(key + ".waypoint.x", 0));
       jobTemplate.setY(file.getDouble(key + ".waypoint.y", 0));
       jobTemplate.setZ(file.getDouble(key + ".waypoint.z", 0));
+
+      jobTemplate.setRerollChance(file.getDouble(key + ".reroll-chance", 0));
 
       jobTemplate.setCompletionNpc(file.getInt(key + ".completion-npc", -1));
       jobTemplate.setCompletionMessage(StringExtensionsKt

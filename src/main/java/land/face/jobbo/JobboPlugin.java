@@ -66,7 +66,7 @@ public class JobboPlugin extends JavaPlugin {
     jobManager.loadTemplates(templatesYAML);
 
     Bukkit.getPluginManager().registerEvents(new SignClickListener(), this);
-    Bukkit.getPluginManager().registerEvents(new BuiltInTaskListener(this), this);
+    Bukkit.getPluginManager().registerEvents(new BuiltInTaskListener(), this);
     if (citizensEnabled) {
       Bukkit.getPluginManager().registerEvents(new NpcClickListener(), this);
     }
