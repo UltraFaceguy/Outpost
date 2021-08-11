@@ -47,7 +47,7 @@ public class JobInfoIcon extends MenuItem {
     List<String> lore = buildCoreLore(stack, job);
     lore.add(StringExtensionsKt.chatColorize(
         "&b&lProgress: &f[ " + job.getProgress() + "/" + job.getProgressCap() + " ]"));
-    ItemStackExtensionsKt.setLore(stack, lore);
+    stack.setLore(lore);
     return stack;
   }
 

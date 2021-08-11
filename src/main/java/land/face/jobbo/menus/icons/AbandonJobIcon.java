@@ -46,7 +46,7 @@ public class AbandonJobIcon extends MenuItem {
   public ItemStack getFinalIcon(Player player) {
     ItemStack stack = new ItemStack(Material.BARRIER);
     ItemStackExtensionsKt.setDisplayName(stack, ChatColor.RED + "Abandon Job");
-    ItemStackExtensionsKt.setLore(stack, desc);
+    stack.setLore(desc);
     return stack;
   }
 

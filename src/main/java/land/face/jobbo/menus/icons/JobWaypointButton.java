@@ -62,7 +62,7 @@ public class JobWaypointButton extends MenuItem {
       return BlankIcon.getBlankStack();
     }
     ItemStackExtensionsKt.setDisplayName(stack, ChatColor.AQUA + "Set Waypoint");
-    ItemStackExtensionsKt.setLore(stack, desc);
+    stack.setLore(desc);
     return stack;
   }
 
