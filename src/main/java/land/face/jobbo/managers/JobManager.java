@@ -24,6 +24,7 @@ import land.face.jobbo.JobboPlugin;
 import land.face.jobbo.data.Job;
 import land.face.jobbo.data.JobBoard;
 import land.face.jobbo.data.JobTemplate;
+import land.face.jobbo.data.PendingSignData;
 import land.face.jobbo.data.PostedJob;
 import land.face.jobbo.events.JobAbandonEvent;
 import land.face.jobbo.events.JobAcceptEvent;
@@ -45,7 +46,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.block.Sign;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -63,7 +63,7 @@ public class JobManager {
 
   private final List<TextComponent> starRating = Arrays.asList(
       Component.text("✦✦✦✦✦").color(TextColor.color(0, 0, 0)),
-      Component.text("✦").color(TextColor.color(	67, 214, 35)).append(
+      Component.text("✦").color(TextColor.color(67, 214, 35)).append(
           Component.text("✦✦✦✦").color(TextColor.color(0, 0, 0))
       ),
       Component.text("✦✦").color(TextColor.color(171, 214, 35)).append(
@@ -72,7 +72,7 @@ public class JobManager {
       Component.text("✦✦✦").color(TextColor.color(222, 193, 53)).append(
           Component.text("✦✦").color(TextColor.color(0, 0, 0))
       ),
-      Component.text("✦✦✦✦").color(TextColor.color(		214, 109, 35)).append(
+      Component.text("✦✦✦✦").color(TextColor.color(214, 109, 35)).append(
           Component.text("✦").color(TextColor.color(0, 0, 0))
       ),
       Component.text("✦✦✦✦✦").color(TextColor.color(255, 77, 77))
@@ -93,8 +93,8 @@ public class JobManager {
       Component.text("New Job: 4m").color(TextColor.color(0, 128, 255)),
       Component.text("New Job: 5m").color(TextColor.color(0, 128, 255))
   );
-  private final TextComponent jobAccepted = Component.text("[JOB ACCEPTED]")
-      .color(TextColor.color(142, 34, 17)).decoration(TextDecoration.BOLD, true);
+  private final TextComponent jobAccepted = Component.text("[JOB TAKEN]")
+      .color(TextColor.color(144, 12, 63)).decoration(TextDecoration.BOLD, true);
   private final TextComponent clickForInfo = Component.text("[Click For Info!]")
       .color(TextColor.color(255, 230, 255));
 
@@ -135,10 +135,6 @@ public class JobManager {
       }
     }
     return null;
-  }
-
-  public JobTemplate getJobTemplate(String id) {
-    return loadedTemplates.get(id);
   }
 
   public void clearAllBoardJobs() {
@@ -343,11 +339,10 @@ public class JobManager {
             continue;
           }
           postedJob.setJob(job);
-          postedJob.setSeconds(315);
+          postedJob.setSeconds(300 + (int) (35 * Math.random()));
           updatePostingSign(board, postedJob);
           continue;
-        }
-        if (postedJob.getSeconds() % 60 == 0) {
+        } else if (postedJob.getSeconds() % 60 == 0) {
           updatePostingSign(board, postedJob);
         }
         postedJob.setSeconds(postedJob.getSeconds() - 1);
@@ -355,25 +350,31 @@ public class JobManager {
     }
   }
 
+  public void tickPostingSigns() {
+    for (JobBoard board : jobBoards) {
+      for (PostedJob postedJob : board.getJobListings()) {
+        postedJob.attemptSignUpdate();
+      }
+    }
+  }
+
   private void updatePostingSign(JobBoard board, PostedJob postedJob) {
-    Location location = postedJob.getLocation();
-    Sign sign = (Sign) location.getBlock().getState();
-    sign.setEditable(true);
+    PendingSignData signData = new PendingSignData();
     if (postedJob.getJob() == null) {
-      sign.line(0, Component.text(""));
-      sign.line(1, jobAccepted);
-      sign.line(2, newJob.get((int) Math.round((double) postedJob.getSeconds() / 60)));
-      sign.line(3, Component.text(""));
+      signData.setLineOne(Component.text(""));
+      signData.setLineTwo(jobAccepted);
+      signData.setLineThree(newJob.get(postedJob.getSeconds() / 60));
+      signData.setLineFour(Component.text(""));
     } else {
       JobTemplate template = postedJob.getJob().getTemplate();
-      sign.line(0, Component.text(postedJob.getJob().getTaskType() + " JOB")
+      signData.setLineOne(Component.text(postedJob.getJob().getTaskType() + " JOB")
           .color(TextColor.color(0, 204, 0)).decoration(TextDecoration.BOLD, true));
-      sign.line(1, starRating.get(template.getDifficulty()));
-      sign.line(2, timeLeft.get((int) Math.round((double) postedJob.getSeconds() / 60)));
-      sign.line(3, clickForInfo);
+      signData.setLineTwo(starRating.get(template.getDifficulty()));
+      signData.setLineThree(timeLeft.get(postedJob.getSeconds() / 60));
+      signData.setLineFour(clickForInfo);
     }
-    sign.setEditable(false);
-    sign.update();
+    postedJob.setPendingSignData(signData);
+    postedJob.attemptSignUpdate();
   }
 
   public void saveBoards() {
@@ -394,6 +395,12 @@ public class JobManager {
       }
     } catch (IOException e) {
       e.printStackTrace();
+    }
+    // Needs to refresh/re-cache stored chunk keys
+    for (JobBoard board : jobBoards) {
+      for (PostedJob postedJob : board.getJobListings()) {
+        postedJob.setLocation(postedJob.getLocation());
+      }
     }
   }
 

@@ -48,7 +48,8 @@ public class JobUtil {
 
   public static void registerJobTask(String taskId, String taskDesc) {
     if (EXTERNAL_JOB_TYPES.containsKey(taskId) || REGISTERED_JOB_TYPES.containsKey(taskId)) {
-      Bukkit.getLogger().warning("Attempted to register task type " + taskId + " but it already exists");
+      Bukkit.getLogger()
+          .warning("Attempted to register task type " + taskId + " but it already exists");
       return;
     }
     if (taskDesc.length() > 13) {

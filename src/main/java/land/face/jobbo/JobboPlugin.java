@@ -16,6 +16,7 @@ import land.face.jobbo.managers.JobManager;
 import land.face.jobbo.menus.AcceptJobMenu;
 import land.face.jobbo.menus.JobsMenu;
 import land.face.jobbo.tasks.JobBoardTicker;
+import land.face.jobbo.tasks.SignUpdateTicker;
 import land.face.jobbo.util.JobUtil;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
@@ -38,10 +39,9 @@ public class JobboPlugin extends JavaPlugin {
   public Economy economy;
 
   private JobManager jobManager;
-
   private MasterConfiguration settings;
-
   private JobsMenu statusMenu;
+  private PaperCommandManager commandManager;
 
   public void onEnable() {
     List<VersionedSmartYamlConfiguration> configurations = new ArrayList<>();
@@ -71,7 +71,7 @@ public class JobboPlugin extends JavaPlugin {
       Bukkit.getPluginManager().registerEvents(new NpcClickListener(), this);
     }
 
-    PaperCommandManager commandManager = new PaperCommandManager(this);
+    commandManager = new PaperCommandManager(this);
     commandManager.registerCommand(new JobCommand(this));
 
     setupEconomy();
@@ -81,6 +81,9 @@ public class JobboPlugin extends JavaPlugin {
 
     JobBoardTicker boardTicker = new JobBoardTicker();
     boardTicker.runTaskTimer(this, 200L, 20L);
+
+    SignUpdateTicker signTicker = new SignUpdateTicker();
+    signTicker.runTaskTimer(this, 400L, 100L);
 
     AcceptJobMenu acceptMenu = new AcceptJobMenu(this);
     AcceptJobMenu.setInstance(acceptMenu);
@@ -95,6 +98,7 @@ public class JobboPlugin extends JavaPlugin {
   }
 
   public void onDisable() {
+    commandManager.unregisterCommands();
     jobManager.saveBoards();
     HandlerList.unregisterAll(this);
     Bukkit.getServer().getScheduler().cancelTasks(this);
