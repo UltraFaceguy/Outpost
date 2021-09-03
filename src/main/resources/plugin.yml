@@ -1,19 +1,19 @@
-name: Jobbo
-version: 1.1.2
-main: land.face.jobbo.JobboPlugin
+name: Outpost
+version: 1.0.0
+main: land.face.outpost.OutpostPlugin
 author: Faceguy
-description: dey tuk our jerbs
+description: Make sum outposts
 depend:
   - Facecore
+  - Strife
+  - Guilds
 softdepend:
   - Waypointer
   - PlaceholderAPI
-  - Strife
-  - Citizens
 api-version: 1.16
 
 commands:
-  jobbo:
+  outpost:
     usage: /<command>
-    aliases: [job]
-    description: jibs
+    aliases: [outpostz]
+    description: outpostsz

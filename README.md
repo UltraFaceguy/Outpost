@@ -1,2 +1,0 @@
-# Jobbo
-Random jobs plugin
