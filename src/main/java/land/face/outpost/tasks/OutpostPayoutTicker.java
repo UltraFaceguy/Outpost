@@ -23,8 +23,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class OutpostPayoutTicker extends BukkitRunnable {
 
-  private OutpostPlugin plugin;
-  private double payoutRatio;
+  private final OutpostPlugin plugin;
+  private final double payoutRatio;
 
   public OutpostPayoutTicker(OutpostPlugin plugin, double seconds) {
     this.plugin = plugin;

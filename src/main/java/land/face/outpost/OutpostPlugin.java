@@ -12,10 +12,12 @@ import land.face.outpost.commands.OutpostCommand;
 import land.face.outpost.listeners.CashDropListener;
 import land.face.outpost.listeners.GuildAlliedMobListener;
 import land.face.outpost.listeners.GuildListener;
+import land.face.outpost.listeners.SpawnerListener;
 import land.face.outpost.managers.OutpostManager;
 import land.face.outpost.menus.OutpostsMenu;
 import land.face.outpost.tasks.OutpostCaptureTicker;
 import land.face.outpost.tasks.OutpostPayoutTicker;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.glaremasters.guilds.Guilds;
 import me.glaremasters.guilds.api.GuildsAPI;
 import org.bukkit.Bukkit;
@@ -38,6 +40,7 @@ public class OutpostPlugin extends JavaPlugin {
   private MasterConfiguration settings;
   private VersionedSmartYamlConfiguration configYAML;
   private OutpostsMenu statusMenu;
+  private PlaceholderExpansion outpostPlaceholder;
 
   public static OutpostPlugin getInstance() {
     return instance;
@@ -67,13 +70,15 @@ public class OutpostPlugin extends JavaPlugin {
     Bukkit.getPluginManager().registerEvents(new GuildListener(this), this);
     Bukkit.getPluginManager().registerEvents(new GuildAlliedMobListener(this), this);
     Bukkit.getPluginManager().registerEvents(new CashDropListener(this, configYAML), this);
+    Bukkit.getPluginManager().registerEvents(new SpawnerListener(this), this);
     //Bukkit.getPluginManager().registerEvents(new PvPListener(this), this);
 
     outpostManager.loadOutposts();
     loadOutpostUniques(configYAML);
 
     if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-      new OutpostPlaceholders().register();
+      outpostPlaceholder = new OutpostPlaceholders();
+      outpostPlaceholder.register();
     }
 
     OutpostCaptureTicker outpostCaptureTicker = new OutpostCaptureTicker(this);
@@ -94,6 +99,7 @@ public class OutpostPlugin extends JavaPlugin {
 
   public void onDisable() {
     outpostManager.saveOutposts();
+    outpostPlaceholder.unregister();
     HandlerList.unregisterAll(this);
     Bukkit.getServer().getScheduler().cancelTasks(this);
     Bukkit.getServer().getLogger().info("Outposts Disabled!");

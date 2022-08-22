@@ -1,10 +1,9 @@
 package land.face.outpost.data;
 
-import land.face.outpost.OutpostPlugin;
+import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import me.glaremasters.guilds.guild.Guild;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 
 public class Outpost {
 
@@ -23,18 +22,21 @@ public class Outpost {
   private int minimumCashReward;
   private long protectTime;
   private String waypoint;
+  @Getter @Setter
+  private Set<String> spawnerIds;
 
   private transient Guild guild;
   private transient OutpostState state;
-  private transient BossBar bossBar;
   private transient Long attackAlertDmCooldown = 1L;
+
+  @Getter @Setter
+  private transient String titleBar;
   private transient double collectedTaxes;
   private transient boolean canRally;
   private transient int lastPayment;
 
   public Outpost(String id) {
     this.id = id;
-    bossBar = makeBar();
   }
 
   public String getId() {
@@ -172,10 +174,6 @@ public class Outpost {
     this.state = state;
   }
 
-  public BossBar getBossBar() {
-    return bossBar;
-  }
-
   public Long getAttackAlertDmCooldown() {
     return attackAlertDmCooldown;
   }
@@ -214,14 +212,6 @@ public class Outpost {
       setLife(life + barrier);
       barrier = 0;
     }
-  }
-
-  public void buildBar() {
-    bossBar = makeBar();
-  }
-
-  private static BossBar makeBar() {
-    return OutpostPlugin.getInstance().getServer().createBossBar("OUTPOST", BarColor.YELLOW, BarStyle.SOLID);
   }
 
   // Don't change order without intent, cardinality is important

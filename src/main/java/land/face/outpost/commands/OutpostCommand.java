@@ -74,6 +74,20 @@ public class OutpostCommand extends BaseCommand {
     plugin.getOutpostManager().removeOutpost(id);
   }
 
+  @Subcommand("addSpawner")
+  @CommandPermission("outpost.edit")
+  public void addSpawner(CommandSender sender, String id, String spawner) {
+    Outpost outpost = plugin.getOutpostManager().getOutpost(id);
+    outpost.getSpawnerIds().add(spawner);
+  }
+
+  @Subcommand("removeSpawner")
+  @CommandPermission("outpost.edit")
+  public void removeSpawner(CommandSender sender, String id, String spawner) {
+    Outpost outpost = plugin.getOutpostManager().getOutpost(id);
+    outpost.getSpawnerIds().remove(spawner);
+  }
+
   @Subcommand("reward")
   @CommandPermission("outpost.reward")
   public void reward(CommandSender sender, String id, int reward) {

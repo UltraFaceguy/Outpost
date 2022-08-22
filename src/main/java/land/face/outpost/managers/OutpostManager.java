@@ -22,17 +22,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Outpost.OutpostState;
 import land.face.outpost.data.Position;
 import land.face.outpost.events.OutpostCaptureEvent;
+import land.face.strife.StrifePlugin;
+import land.face.strife.data.Spawner;
+import land.face.strife.data.StrifeMob;
+import land.face.strife.data.UniqueEntity;
+import land.face.strife.managers.GuiManager;
 import me.glaremasters.guilds.guild.Guild;
 import me.glaremasters.guilds.guild.GuildMember;
 import me.glaremasters.guilds.guild.GuildRolePerm;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 
 public class OutpostManager {
@@ -83,6 +90,7 @@ public class OutpostManager {
 
     Outpost outpost = new Outpost(id);
     outpost.setName(name.replaceAll("_", " "));
+    outpost.setSpawnerIds(new HashSet<>());
     outpost.setMaxBarrier(750);
     outpost.setMaxLife(1250);
     outpost.setGuildId(null);
@@ -128,15 +136,14 @@ public class OutpostManager {
     Set<Player> playersOnOutpost = getPlayersOnOutpost(o);
 
     if (o.getProtectTime() > System.currentTimeMillis()) {
-      o.getBossBar().setTitle(ChatColor.GOLD + o.getName() + " " + ChatColor.GREEN + "PROTECTED "
-          + ChatColor.GOLD + o.getGuild().getName());
-      updateBars(o, playersOnOutpost, false);
+      o.setTitleBar(ChatColor.GOLD + "" + ChatColor.BOLD + o.getGuild().getName() +
+          ChatColor.GREEN + "" + ChatColor.BOLD + " PROTECTED");
+      updateBars(o, playersOnOutpost);
       o.setState(OutpostState.PROTECTED);
       return;
     }
 
     if (playersOnOutpost.isEmpty()) {
-      o.getBossBar().removeAll();
       o.setBarrier(Math.min(o.getMaxBarrier(), o.getBarrier() + o.getMaxBarrier() / 100));
       o.setState(OutpostState.OPEN);
       return;
@@ -145,7 +152,6 @@ public class OutpostManager {
     Map<Guild, Integer> contestingGuilds = getGuildsOnOutpost(o, playersOnOutpost);
 
     if (contestingGuilds.isEmpty()) {
-      o.getBossBar().removeAll();
       o.setBarrier(Math.min(o.getMaxBarrier(), o.getBarrier() + o.getMaxBarrier() / 100));
       o.setState(OutpostState.OPEN);
       return;
@@ -153,17 +159,9 @@ public class OutpostManager {
 
     Guild owningGuild = o.getGuild();
 
-    String name;
-    if (owningGuild == null || StringUtils.isBlank(owningGuild.getName())) {
-      name = ChatColor.GRAY + "<Unowned>";
-    } else {
-      name = owningGuild.getName();
-    }
-    o.getBossBar().setProgress(
-        (o.getLife() + o.getBarrier()) / (o.getMaxLife() + o.getMaxBarrier()));
-    o.getBossBar().setTitle(ChatColor.GOLD + o.getName() + "  " + ChatColor.WHITE
-        + INT_FORMAT.format(o.getBarrier()) + "❤ " + ChatColor.RED
-        + INT_FORMAT.format(o.getLife()) + "❤  " + ChatColor.GOLD + name);
+    o.setTitleBar(ChatColor.GOLD + "" + ChatColor.BOLD + o.getName() +
+        ChatColor.WHITE + "  " + INT_FORMAT.format(o.getBarrier()) + "♡ " +
+        ChatColor.RED + INT_FORMAT.format(o.getLife()) + "♡");
 
     boolean isOwnerDefending = o.getGuild() != null && contestingGuilds.containsKey(owningGuild);
 
@@ -171,7 +169,7 @@ public class OutpostManager {
       if (contestingGuilds.size() == 1) {
         o.setBarrier(Math.min(o.getMaxBarrier(), o.getBarrier() + o.getMaxBarrier() / 100));
         o.setState(OutpostState.DEFENDED);
-        updateBars(o, playersOnOutpost, false);
+        updateBars(o, playersOnOutpost);
         return;
       }
       o.setState(OutpostState.CONTESTED);
@@ -180,12 +178,12 @@ public class OutpostManager {
           MessageUtils.sendMessage(p, contestMsg);
         }
       }
-      if (o.getGuild() != null && ticks % 30 == 0) {
+      if (o.getGuild() != null && ticks % 200 == 0) {
         for (Player p : o.getGuild().getOnlineAsPlayers()) {
           MessageUtils.sendMessage(p, attackMsg.replace("{name}", o.getName()));
         }
       }
-      updateBars(o, playersOnOutpost, true);
+      updateBars(o, playersOnOutpost);
       return;
     }
 
@@ -206,7 +204,7 @@ public class OutpostManager {
       o.setAttackAlertDmCooldown(System.currentTimeMillis() + 1500000);
     }
 
-    if (o.getGuild() != null && ticks % 30 == 0) {
+    if (o.getGuild() != null && ticks % 200 == 0) {
       for (Player p : o.getGuild().getOnlineAsPlayers()) {
         MessageUtils.sendMessage(p, attackMsg.replace("{name}", o.getName()));
       }
@@ -220,7 +218,7 @@ public class OutpostManager {
         captureOutpost(o, capGuild);
       }
     }
-    updateBars(o, playersOnOutpost, true);
+    updateBars(o, playersOnOutpost);
   }
 
   public void tickOutposts(int ticks) {
@@ -229,24 +227,22 @@ public class OutpostManager {
     }
   }
 
-  private void updateBars(Outpost o, Set<Player> playersOnOutpost, boolean alertOwners) {
-    Set<Player> barPlayers = new HashSet<>(playersOnOutpost);
-    Guild owningGuild = o.getGuild();
-
-    if (alertOwners && owningGuild != null) {
-      barPlayers.addAll(owningGuild.getOnlineAsPlayers());
+  private void updateBars(Outpost o, Set<Player> playersOnOutpost) {
+    if (playersOnOutpost.isEmpty()) {
+      return;
     }
 
-    Set<Player> removePlayers = new HashSet<>(o.getBossBar().getPlayers());
-    removePlayers.removeAll(barPlayers);
-
-    for (Player p : barPlayers) {
-      if (!o.getBossBar().getPlayers().contains(p)) {
-        o.getBossBar().addPlayer(p);
-      }
+    double progress = (double) o.getLife() / o.getMaxLife();
+    int stage = (int) (138D * progress);
+    int barrierState = (int) ((138f * o.getBarrier()) / o.getMaxBarrier());
+    String s = "\uD806\uDCB9" + GuiManager.HEALTH_BAR_TARGET.get(138 - stage);
+    if (barrierState > 0) {
+       s += GuiManager.BARRIER_BAR_TARGET.get(barrierState);
     }
-    for (Player p : removePlayers) {
-      o.getBossBar().removePlayer(p);
+
+    for (Player p : playersOnOutpost) {
+      StrifePlugin.getInstance().getBossBarManager().updateBar(p, 3, 2, o.getTitleBar(), 30);
+      StrifePlugin.getInstance().getBossBarManager().updateBar(p, 2, 2, s, 30);
     }
   }
 
@@ -274,17 +270,31 @@ public class OutpostManager {
     outpost.setCanRally(true);
     outpost.setGuildId(newGuild.getId().toString());
     outpost.setGuild(newGuild);
-    outpost.getBossBar().setProgress(1);
     outpost.setLife(outpost.getMaxLife());
     outpost.setBarrier(outpost.getMaxBarrier());
     outpost.setState(OutpostState.PROTECTED);
+
     OutpostCaptureEvent event = new OutpostCaptureEvent(outpost);
     Bukkit.getPluginManager().callEvent(event);
+
+    for (String s : outpost.getSpawnerIds()) {
+      Spawner spawner = StrifePlugin.getInstance().getSpawnerManager().getSpawnerMap().get(s);
+      UniqueEntity ue = spawner.getUniqueEntity();
+      for (LivingEntity le : spawner.getEntities()) {
+        StrifeMob mob = StrifePlugin.getInstance().getStrifeMobManager().getMobs().get(le);
+        mob.setAlliedGuild(newGuild.getId());
+        if (le instanceof Mob) {
+          ((Mob) le).setTarget(null);
+        }
+        le.getWorld().playSound(le.getLocation(),
+            Sound.ENTITY_EVOKER_PREPARE_WOLOLO, 1, (float) (0.8 + (Math.random() * 0.4)));
+        le.setCustomName(ChatColor.GOLD + "[" + newGuild.getPrefix() + "] " + ue.getName());
+      }
+    }
   }
 
   public void dmGuildMembers(Guild guild, String message) {
-    List<UUID> guildMembers = guild.getMembers().stream()
-        .map(GuildMember::getUuid).collect(Collectors.toList());
+    List<UUID> guildMembers = guild.getMembers().stream().map(GuildMember::getUuid).toList();
     for (UUID uuid : guildMembers) {
       String id = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(uuid);
       if (StringUtils.isBlank(id)) {
@@ -351,9 +361,6 @@ public class OutpostManager {
       if (guild == null) {
         continue;
       }
-      if (!outpost.getBossBar().getPlayers().contains(p)) {
-        outpost.getBossBar().addPlayer(p);
-      }
       if (outpost.getGuild() != null && outpost.getGuild().getAllies().contains(guild.getId())) {
         guild = outpost.getGuild();
       }
@@ -379,12 +386,14 @@ public class OutpostManager {
       JsonArray array = gson.fromJson(reader, JsonArray.class);
       for (JsonElement e : array) {
         Outpost outpost = gson.fromJson(e, Outpost.class);
-        outpost.buildBar();
         if (outpost.getGuildId() != null) {
           outpost.setGuild(plugin.getGuildsAPI().getGuildHandler()
               .getGuild(UUID.fromString(outpost.getGuildId())));
         } else {
           outpost.setGuild(null);
+        }
+        if (outpost.getSpawnerIds() == null) {
+          outpost.setSpawnerIds(new HashSet<>());
         }
         outpost.setState(OutpostState.OPEN);
         outpost.setAttackAlertDmCooldown(1L);

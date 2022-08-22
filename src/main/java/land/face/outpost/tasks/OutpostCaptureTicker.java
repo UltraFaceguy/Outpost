@@ -23,7 +23,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class OutpostCaptureTicker extends BukkitRunnable {
 
-  private OutpostPlugin plugin;
+  private final OutpostPlugin plugin;
   private int ticks = 0;
 
   public OutpostCaptureTicker(OutpostPlugin plugin) {
