@@ -2,8 +2,11 @@ package land.face.outpost.managers;
 
 import static land.face.outpost.OutpostPlugin.INT_FORMAT;
 
+import com.tealcube.minecraft.bukkit.facecore.utilities.FaceColor;
+import com.tealcube.minecraft.bukkit.facecore.utilities.FaceColor.ShaderStyle;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.TextUtils;
+import com.tealcube.minecraft.bukkit.facecore.utilities.TitleUtils;
 import com.tealcube.minecraft.bukkit.shade.apache.commons.lang3.StringUtils;
 import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
@@ -209,7 +212,7 @@ public class OutpostManager {
         o.setLife(1);
       } else {
         Guild capGuild = contestingGuilds.keySet().iterator().next();
-        captureOutpost(o, capGuild);
+        captureOutpost(o, capGuild, playersOnOutpost);
       }
     }
     updateBars(o, playersOnOutpost);
@@ -240,7 +243,7 @@ public class OutpostManager {
     }
   }
 
-  public void captureOutpost(Outpost outpost, Guild newGuild) {
+  public void captureOutpost(Outpost outpost, Guild newGuild, Set<Player> capturers) {
     if (outpostChannel != null) {
       DiscordUtil.sendMessage(outpostChannel, discordCaptureAnnouncement
           .replace("{gname}", newGuild.getName())
@@ -285,7 +288,12 @@ public class OutpostManager {
         le.setCustomName(ChatColor.GOLD + "[" + newGuild.getPrefix() + "] " + ue.getName());
       }
     }
-    BannerPainter.setGuildBannersInArea(newGuild, 100, outpost.getCenterLocation(), null);
+    BannerPainter.setGuildBannersInArea(newGuild, 32, outpost.getCenterLocation());
+    for (Player p : capturers) {
+      TitleUtils.sendTitle(p, FaceColor.ORANGE.shaded(ShaderStyle.SHAKE) + "Outpost Captured!",
+          FaceColor.BROWN.shaded(ShaderStyle.BOUNCE) + "Hollah Hollah Get Dollah", 100, 10, 10);
+      p.playSound(p.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_1, SoundCategory.MASTER, 1, 1);
+    }
   }
 
   public void dmGuildMembers(Guild guild, String message) {

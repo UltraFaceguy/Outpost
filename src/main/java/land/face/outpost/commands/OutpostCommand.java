@@ -3,6 +3,7 @@ package land.face.outpost.commands;
 import static com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils.sendMessage;
 
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
+import com.tealcube.minecraft.bukkit.facecore.utilities.PaletteUtil;
 import com.tealcube.minecraft.bukkit.shade.acf.BaseCommand;
 import com.tealcube.minecraft.bukkit.shade.acf.annotation.CommandAlias;
 import com.tealcube.minecraft.bukkit.shade.acf.annotation.CommandPermission;
@@ -201,10 +202,13 @@ public class OutpostCommand extends BaseCommand {
   @Subcommand("banner")
   @CommandPermission("outpost.banner")
   public void setOutpostBanner(Player player, String bannerCode){
-
     Guild guild = plugin.getGuildsAPI().getGuild(player);
-    if (!guild.getGuildMaster().equals(player)){
-      MessageUtils.sendMessage(player, "You must be the guild master to preform this action!");
+    if (guild == null) {
+      PaletteUtil.sendMessage(player, "|yellow|You're not even in a guild...");
+      return;
+    }
+    if (!guild.isMaster(player)){
+      PaletteUtil.sendMessage(player, "|yellow|You must own the guild to do this!");
       return;
     }
     if (bannerCode.contains("https")){
@@ -212,17 +216,16 @@ public class OutpostCommand extends BaseCommand {
       bannerCode = segments[segments.length - 1];
     }
     BannerPainter.setGuildBannerCode(guild, bannerCode);
+    PaletteUtil.sendMessage(player, "|lgreen|Guild banner set!");
   }
 
   @Subcommand("bannerdebug")
   @CommandPermission("outpost.banner.debug")
-  public void debugOutpostBanner(Player player, String bannerCode){
-
-    Guild guild = plugin.getGuildsAPI().getGuild(player);
+  public void debugOutpostBanner(Player player, String bannerCode) {
     if (bannerCode.contains("https")){
       String segments[] = bannerCode.split("=");
       bannerCode = segments[segments.length - 1];
     }
-    BannerPainter.setGuildBannersInArea(guild, 10, player.getLocation(), bannerCode);
+    BannerPainter.setBannersInArea(player.getLocation(), 10, bannerCode);
   }
 }
