@@ -241,8 +241,8 @@ public class OutpostManager {
     }
 
     for (Player p : playersOnOutpost) {
-      StrifePlugin.getInstance().getBossBarManager().updateBar(p, 3, 2, o.getTitleBar(), 30);
-      StrifePlugin.getInstance().getBossBarManager().updateBar(p, 2, 2, s, 30);
+      StrifePlugin.getInstance().getBossBarManager().updateBar(p, 2, 2, o.getTitleBar(), 30);
+      StrifePlugin.getInstance().getBossBarManager().updateBar(p, 3, 2, s, 30);
     }
   }
 
