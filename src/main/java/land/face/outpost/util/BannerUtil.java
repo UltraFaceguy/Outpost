@@ -1,4 +1,4 @@
-package land.face.outpost;
+package land.face.outpost.util;
 
 import java.util.ArrayList;
 import java.util.Collections;

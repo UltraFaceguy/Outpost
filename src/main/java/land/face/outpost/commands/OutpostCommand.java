@@ -12,6 +12,8 @@ import java.util.List;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Position;
+import land.face.outpost.util.BannerPainter;
+import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -194,5 +196,33 @@ public class OutpostCommand extends BaseCommand {
     }
     outpost.setPvpPos2(pos);
     sendMessage(sender, "&aset pvp pos2");
+  }
+
+  @Subcommand("banner")
+  @CommandPermission("outpost.banner")
+  public void setOutpostBanner(Player player, String bannerCode){
+
+    Guild guild = plugin.getGuildsAPI().getGuild(player);
+    if (!guild.getGuildMaster().equals(player)){
+      MessageUtils.sendMessage(player, "You must be the guild master to preform this action!");
+      return;
+    }
+    if (bannerCode.contains("https")){
+      String segments[] = bannerCode.split("=");
+      bannerCode = segments[segments.length - 1];
+    }
+    BannerPainter.setGuildBannerCode(guild, bannerCode);
+  }
+
+  @Subcommand("bannerdebug")
+  @CommandPermission("outpost.banner.debug")
+  public void debugOutpostBanner(Player player, String bannerCode){
+
+    Guild guild = plugin.getGuildsAPI().getGuild(player);
+    if (bannerCode.contains("https")){
+      String segments[] = bannerCode.split("=");
+      bannerCode = segments[segments.length - 1];
+    }
+    BannerPainter.setGuildBannersInArea(guild, 10, player.getLocation(), bannerCode);
   }
 }

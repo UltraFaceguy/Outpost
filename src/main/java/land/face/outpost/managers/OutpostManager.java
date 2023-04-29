@@ -15,13 +15,9 @@ import github.scarsz.discordsrv.util.DiscordUtil;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+
+import land.face.outpost.util.BannerPainter;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Outpost.OutpostState;
@@ -35,9 +31,7 @@ import land.face.strife.managers.GuiManager;
 import me.glaremasters.guilds.guild.Guild;
 import me.glaremasters.guilds.guild.GuildMember;
 import me.glaremasters.guilds.guild.GuildRolePerm;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
@@ -291,6 +285,7 @@ public class OutpostManager {
         le.setCustomName(ChatColor.GOLD + "[" + newGuild.getPrefix() + "] " + ue.getName());
       }
     }
+    BannerPainter.setGuildBannersInArea(newGuild, 100, outpost.getCenterLocation(), null);
   }
 
   public void dmGuildMembers(Guild guild, String message) {

@@ -1,9 +1,14 @@
 package land.face.outpost.data;
 
 import java.util.Set;
+import java.util.Vector;
+
+import land.face.outpost.OutpostPlugin;
 import lombok.Getter;
 import lombok.Setter;
 import me.glaremasters.guilds.guild.Guild;
+import org.bukkit.Location;
+import org.bukkit.World;
 
 public class Outpost {
 
@@ -212,6 +217,18 @@ public class Outpost {
       setLife(life + barrier);
       barrier = 0;
     }
+  }
+
+  public Location getCenterLocation(){
+
+    Vector centerPos = new Vector();
+    centerPos.add(getPos1().getX() + getPos2().getX() / 2);
+    centerPos.add(getPos1().getY() + getPos2().getY() / 2);
+    centerPos.add(getPos1().getZ() + getPos2().getZ() / 2);
+
+    World outpostWorld = OutpostPlugin.getInstance().getServer().getWorld(getWorld());
+
+    return new Location(outpostWorld, centerPos.indexOf(0),  centerPos.indexOf(1),  centerPos.indexOf(2));
   }
 
   // Don't change order without intent, cardinality is important
