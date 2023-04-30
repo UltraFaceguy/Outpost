@@ -18,6 +18,7 @@ import land.face.outpost.menus.OutpostsMenu;
 import land.face.outpost.tasks.OutpostCaptureTicker;
 import land.face.outpost.tasks.OutpostPayoutTicker;
 import land.face.outpost.managers.GuildBannerManager;
+import lombok.Getter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.glaremasters.guilds.Guilds;
 import me.glaremasters.guilds.api.GuildsAPI;
@@ -33,7 +34,9 @@ public class OutpostPlugin extends JavaPlugin {
   public static final DecimalFormat INT_FORMAT = new DecimalFormat("#,###,###,###,###");
   public static final DecimalFormat ONE_DECIMAL = new DecimalFormat("#,###,###,###,###.#");
 
+  @Getter
   private OutpostManager outpostManager;
+  @Getter
   private GuildBannerManager guildBannerManager;
   private GuildsAPI guildsAPI;
   private boolean waypointerEnabled;
@@ -113,12 +116,6 @@ public class OutpostPlugin extends JavaPlugin {
   public MasterConfiguration getSettings() {
     return settings;
   }
-
-  public OutpostManager getOutpostManager() {
-    return outpostManager;
-  }
-
-  public GuildBannerManager getGuildBannerManager(){ return guildBannerManager; }
 
   public GuildsAPI getGuildsAPI() {
     return guildsAPI;
