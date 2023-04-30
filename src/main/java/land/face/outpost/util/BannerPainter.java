@@ -48,10 +48,6 @@ public class BannerPainter {
 
   public static void setBannersInArea(Location center, int size, String code) {
     Bukkit.getLogger().info("[Outpost] Setting banners in area...");
-    if (StringUtils.isBlank(code)) {
-      Bukkit.getLogger().info("[Outpost] Empty code, nvm");
-      return;
-    }
     ItemStack bannerItem = BannerUtil.getBanner(code);
     List<Block> bannerBlockList = new ArrayList<>();
     for (int x = center.getBlockX() - size; x <= center.getBlockX() + size; x++) {
@@ -92,7 +88,6 @@ public class BannerPainter {
         Banner bannerState = (Banner) block.getState();
         bannerState.setPatterns(patterns);
         bannerState.setBlockData(block.getBlockData());
-        ;
         bannerState.update();
         BlockData data = block.getBlockData();
         ((Rotatable) data).setRotation(rotation);
