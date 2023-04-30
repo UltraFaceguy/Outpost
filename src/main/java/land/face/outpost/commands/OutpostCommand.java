@@ -13,7 +13,6 @@ import java.util.List;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Position;
-import land.face.outpost.util.BannerPainter;
 import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -215,7 +214,7 @@ public class OutpostCommand extends BaseCommand {
       String segments[] = bannerCode.split("=");
       bannerCode = segments[segments.length - 1];
     }
-    BannerPainter.setGuildBannerCode(guild, bannerCode);
+    plugin.getGuildBannerManager().setGuildBannerCode(guild, bannerCode);
     PaletteUtil.sendMessage(player, "|lgreen|Guild banner set!");
   }
 
@@ -226,6 +225,6 @@ public class OutpostCommand extends BaseCommand {
       String segments[] = bannerCode.split("=");
       bannerCode = segments[segments.length - 1];
     }
-    BannerPainter.setBannersInArea(player.getLocation(), 10, bannerCode);
+    plugin.getGuildBannerManager().setBannersInArea(player.getLocation(), 10, bannerCode);
   }
 }

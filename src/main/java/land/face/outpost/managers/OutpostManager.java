@@ -20,7 +20,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-import land.face.outpost.util.BannerPainter;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Outpost.OutpostState;
@@ -288,7 +287,7 @@ public class OutpostManager {
         le.setCustomName(ChatColor.GOLD + "[" + newGuild.getPrefix() + "] " + ue.getName());
       }
     }
-    BannerPainter.setGuildBannersInArea(newGuild, 32, outpost.getCenterLocation());
+    plugin.getGuildBannerManager().setGuildBannersInArea(newGuild, 32, outpost.getCenterLocation());
     for (Player p : capturers) {
       TitleUtils.sendTitle(p, FaceColor.ORANGE.shaded(ShaderStyle.SHAKE) + "Outpost Captured!",
           FaceColor.BROWN.shaded(ShaderStyle.BOUNCE) + "Hollah Hollah Get Dollah", 100, 10, 10);

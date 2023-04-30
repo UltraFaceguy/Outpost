@@ -17,7 +17,7 @@ import land.face.outpost.managers.OutpostManager;
 import land.face.outpost.menus.OutpostsMenu;
 import land.face.outpost.tasks.OutpostCaptureTicker;
 import land.face.outpost.tasks.OutpostPayoutTicker;
-import land.face.outpost.util.BannerPainter;
+import land.face.outpost.managers.GuildBannerManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.glaremasters.guilds.Guilds;
 import me.glaremasters.guilds.api.GuildsAPI;
@@ -34,7 +34,7 @@ public class OutpostPlugin extends JavaPlugin {
   public static final DecimalFormat ONE_DECIMAL = new DecimalFormat("#,###,###,###,###.#");
 
   private OutpostManager outpostManager;
-  private BannerPainter bannerPainter;
+  private GuildBannerManager guildBannerManager;
   private GuildsAPI guildsAPI;
   private boolean waypointerEnabled;
 
@@ -67,7 +67,7 @@ public class OutpostPlugin extends JavaPlugin {
     waypointerEnabled = Bukkit.getPluginManager().getPlugin("Waypointer") != null;
 
     outpostManager = new OutpostManager(this);
-    bannerPainter = new BannerPainter(this);
+    guildBannerManager = new GuildBannerManager(this);
 
     Bukkit.getPluginManager().registerEvents(new GuildListener(this), this);
     Bukkit.getPluginManager().registerEvents(new GuildAlliedMobListener(this), this);
@@ -76,7 +76,7 @@ public class OutpostPlugin extends JavaPlugin {
     //Bukkit.getPluginManager().registerEvents(new PvPListener(this), this);
 
     outpostManager.loadOutposts();
-    bannerPainter.loadGuildBanners();
+    guildBannerManager.loadGuildBanners();
 
     loadOutpostUniques(configYAML);
 
@@ -103,7 +103,7 @@ public class OutpostPlugin extends JavaPlugin {
 
   public void onDisable() {
     outpostManager.saveOutposts();
-    bannerPainter.saveGuildBanners();
+    guildBannerManager.saveGuildBanners();
     outpostPlaceholder.unregister();
     HandlerList.unregisterAll(this);
     Bukkit.getServer().getScheduler().cancelTasks(this);
@@ -117,6 +117,8 @@ public class OutpostPlugin extends JavaPlugin {
   public OutpostManager getOutpostManager() {
     return outpostManager;
   }
+
+  public GuildBannerManager getGuildBannerManager(){ return guildBannerManager; }
 
   public GuildsAPI getGuildsAPI() {
     return guildsAPI;

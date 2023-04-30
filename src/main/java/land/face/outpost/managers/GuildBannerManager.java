@@ -1,4 +1,4 @@
-package land.face.outpost.util;
+package land.face.outpost.managers;
 
 import com.tealcube.minecraft.bukkit.shade.apache.commons.lang3.StringUtils;
 import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.BannerData;
+import land.face.outpost.util.BannerUtil;
 import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -31,22 +32,22 @@ import org.bukkit.block.data.Rotatable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 
-public class BannerPainter {
+public class GuildBannerManager {
 
   private final OutpostPlugin plugin;
   private final Gson gson = new Gson();
 
-  public BannerPainter(OutpostPlugin plugin) {
+  public GuildBannerManager(OutpostPlugin plugin) {
     this.plugin = plugin;
   }
 
-  private static final Map<UUID, String> bannerCodeByGuildID = new HashMap<>();
+  private final Map<UUID, String> bannerCodeByGuildID = new HashMap<>();
 
-  public static void setGuildBannersInArea(Guild guild, int borderSize, Location center) {
+  public void setGuildBannersInArea(Guild guild, int borderSize, Location center) {
     setBannersInArea(center, borderSize, bannerCodeByGuildID.get(guild.getId()));
   }
 
-  public static void setBannersInArea(Location center, int size, String code) {
+  public void setBannersInArea(Location center, int size, String code) {
     Bukkit.getLogger().info("[Outpost] Setting banners in area...");
     ItemStack bannerItem = BannerUtil.getBanner(code);
     List<Block> bannerBlockList = new ArrayList<>();
@@ -105,7 +106,7 @@ public class BannerPainter {
     }
   }
 
-  public static void setGuildBannerCode(Guild guild, String bannerCode) {
+  public void setGuildBannerCode(Guild guild, String bannerCode) {
     bannerCodeByGuildID.put(guild.getId(), bannerCode);
   }
 
