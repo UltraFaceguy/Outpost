@@ -1,7 +1,8 @@
 package land.face.outpost.data;
 
+import com.soujah.poggersguilds.data.Guild;
+
 import java.util.Comparator;
-import me.glaremasters.guilds.guild.Guild;
 
 public class OutpostComparator implements Comparator<Outpost> {
 

@@ -2,8 +2,10 @@ package land.face.outpost.data;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class BannerData {
-  private String uuid;
+  private UUID id;
   private String bannerCode;
 }

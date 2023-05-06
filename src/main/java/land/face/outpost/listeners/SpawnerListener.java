@@ -34,8 +34,8 @@ public class SpawnerListener implements Listener {
     }
     if (spawnerGuilds.containsKey(event.getSpawner().getId())) {
       String spawnerId = event.getSpawner().getId();
-      UUID guildUUid = spawnerGuilds.get(spawnerId);
-      String prefix = plugin.getGuildsAPI().getGuild(guildUUid).getPrefix();
+      UUID guildID = spawnerGuilds.get(spawnerId);
+      String prefix = plugin.getGuildAPI().getGuildFromId(guildID).getGuildTag();
       event.getStrifeMob().setAlliedGuild(spawnerGuilds.get(spawnerId));
       event.getStrifeMob().getEntity().setCustomName(ChatColor.GOLD + "[" + prefix + "] " +
           event.getStrifeMob().getEntity().getCustomName());

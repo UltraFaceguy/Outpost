@@ -18,19 +18,17 @@
  */
 package land.face.outpost.menus.icons;
 
+import com.soujah.poggersguilds.data.Guild;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.TextUtils;
 import com.tealcube.minecraft.bukkit.shade.apache.commons.lang.WordUtils;
 import com.tealcube.minecraft.bukkit.shade.apache.commons.lang3.StringUtils;
 import com.tealcube.minecraft.bukkit.shade.apache.commons.lang3.time.DurationFormatUtils;
 import io.pixeloutlaw.minecraft.spigot.hilt.ItemStackExtensionsKt;
-import java.util.ArrayList;
-import java.util.List;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Outpost.OutpostState;
 import land.face.waypointer.WaypointerPlugin;
-import me.glaremasters.guilds.guild.Guild;
 import ninja.amp.ampmenus.events.ItemClickEvent;
 import ninja.amp.ampmenus.items.MenuItem;
 import org.bukkit.ChatColor;
@@ -38,6 +36,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class OutpostIcon extends MenuItem {
 
@@ -52,7 +53,7 @@ public class OutpostIcon extends MenuItem {
   public ItemStack getFinalIcon(Player player) {
     ItemStack stack = new ItemStack(Material.PAPER);
     ItemStackExtensionsKt.setDisplayName(stack, ChatColor.RED + outpost.getName());
-    Guild guild = OutpostPlugin.getInstance().getGuildsAPI().getGuild(player);
+    Guild guild = OutpostPlugin.getInstance().getGuildAPI().getGuildFromPlayer(player);
     switch (outpost.getState()) {
       case OPEN:
         ItemStackExtensionsKt.setCustomModelData(stack, 10000);
@@ -76,7 +77,7 @@ public class OutpostIcon extends MenuItem {
     if (outpost.getGuild() == null) {
       lore.add("&fCurrent Owner: &7<Unowned>");
     } else {
-      lore.add("&fCurrent Owner: &e" + outpost.getGuild().getName());
+      lore.add("&fCurrent Owner: &e" + outpost.getGuild().getGuildName());
     }
     lore.add("");
     if (guild != null && outpost.getGuild() == guild && outpost.isCanRally()) {
@@ -100,7 +101,7 @@ public class OutpostIcon extends MenuItem {
             .setWaypoint(event.getPlayer(), outpost.getWaypoint());
       }
     } else if (event.getClickType() == ClickType.LEFT) {
-      Guild guild = OutpostPlugin.getInstance().getGuildsAPI().getGuild(event.getPlayer());
+      Guild guild = OutpostPlugin.getInstance().getGuildAPI().getGuildFromPlayer(event.getPlayer());
       if (guild == null) {
         MessageUtils.sendMessage(event.getPlayer(), "&eYou cannot rally without a guild...");
       } else if (outpost.getGuild() != guild) {

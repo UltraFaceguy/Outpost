@@ -1,7 +1,5 @@
 package land.face.outpost.listeners;
 
-import static com.sk89q.worldedit.math.BlockVector3.at;
-
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.WorldGuard;
@@ -10,25 +8,27 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
+import com.soujah.poggersguilds.api.GuildAPI;
+import com.soujah.poggersguilds.data.Guild;
 import com.tealcube.minecraft.bukkit.bullion.GoldDropEvent;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedSmartYamlConfiguration;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
-import me.glaremasters.guilds.Guilds;
-import me.glaremasters.guilds.api.GuildsAPI;
-import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import static com.sk89q.worldedit.math.BlockVector3.at;
+
 public class CashDropListener implements Listener {
 
   private OutpostPlugin plugin;
-  private GuildsAPI guildsAPI;
+  private GuildAPI guildAPI;
 
   private RegionContainer regionContainer;
   private StringMatcher stringMatcher;
@@ -37,7 +37,7 @@ public class CashDropListener implements Listener {
 
   public CashDropListener(OutpostPlugin plugin, VersionedSmartYamlConfiguration config) {
     this.plugin = plugin;
-    guildsAPI = Guilds.getApi();
+    guildAPI = plugin.getGuildAPI();
     regionContainer = WorldGuard.getInstance().getPlatform().getRegionContainer();
     stringMatcher = WorldGuard.getInstance().getPlatform().getMatcher();
     ConfigurationSection cs = config.getConfigurationSection("region-map");
@@ -86,7 +86,7 @@ public class CashDropListener implements Listener {
       return;
     }
 
-    Guild killerGuild = event.getKiller() == null ? null : guildsAPI.getGuildHandler().getGuild(event.getKiller());
+    Guild killerGuild = event.getKiller() == null ? null : plugin.getGuildAPI().getGuildFromPlayer(event.getKiller());
     boolean isKillerMember = killerGuild != null && killerGuild == outpost.getGuild();
 
     if (isKillerMember) {

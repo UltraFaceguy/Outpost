@@ -1,20 +1,20 @@
 package land.face.outpost.data;
 
-import java.util.Set;
-
-import land.face.outpost.OutpostPlugin;
+import com.soujah.poggersguilds.data.Guild;
 import lombok.Getter;
 import lombok.Setter;
-import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+
+import java.util.Set;
+import java.util.UUID;
 
 public class Outpost {
 
   private final String id;
   private String name;
-  private String guildId;
+  private UUID guildId;
   private String world;
   private Position pos1;
   private Position pos2;
@@ -56,11 +56,11 @@ public class Outpost {
     this.name = name;
   }
 
-  public String getGuildId() {
+  public UUID getGuildId() {
     return guildId;
   }
 
-  public void setGuildId(String guildId) {
+  public void setGuildId(UUID guildId) {
     this.guildId = guildId;
   }
 

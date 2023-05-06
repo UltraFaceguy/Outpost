@@ -1,9 +1,9 @@
 package land.face.outpost;
 
+import com.soujah.poggersguilds.data.Guild;
 import com.tealcube.minecraft.bukkit.shade.apache.commons.lang3.StringUtils;
 import land.face.outpost.data.Outpost;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -35,10 +35,10 @@ public class OutpostPlaceholders extends PlaceholderExpansion {
       if (outpost.getGuild() == null) {
         return ChatColor.GRAY + "<Unowned>";
       }
-      return outpost.getGuild().getName();
+      return outpost.getGuild().getGuildName();
     }
     if (placeholder.startsWith("owned")) {
-      Guild guild = OutpostPlugin.getInstance().getGuildsAPI().getGuild(p);
+      Guild guild = OutpostPlugin.getInstance().getGuildAPI().getGuildFromPlayer(p);
       if (guild == null) {
         return "0";
       }
@@ -51,7 +51,7 @@ public class OutpostPlaceholders extends PlaceholderExpansion {
       return Integer.toString(count);
     }
     if (placeholder.startsWith("income")) {
-      Guild guild = OutpostPlugin.getInstance().getGuildsAPI().getGuild(p);
+      Guild guild = OutpostPlugin.getInstance().getGuildAPI().getGuildFromPlayer(p);
       if (guild == null) {
         return "0";
       }

@@ -1,31 +1,32 @@
 package land.face.outpost;
 
+import com.soujah.poggersguilds.GuildPlugin;
+import com.soujah.poggersguilds.api.GuildAPI;
 import com.tealcube.minecraft.bukkit.shade.acf.PaperCommandManager;
 import io.pixeloutlaw.minecraft.spigot.config.MasterConfiguration;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedConfiguration;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedSmartYamlConfiguration;
-import java.io.File;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import land.face.outpost.commands.OutpostCommand;
 import land.face.outpost.listeners.CashDropListener;
 import land.face.outpost.listeners.GuildAlliedMobListener;
 import land.face.outpost.listeners.GuildListener;
 import land.face.outpost.listeners.SpawnerListener;
+import land.face.outpost.managers.GuildBannerManager;
 import land.face.outpost.managers.OutpostManager;
 import land.face.outpost.menus.OutpostsMenu;
 import land.face.outpost.tasks.OutpostCaptureTicker;
 import land.face.outpost.tasks.OutpostPayoutTicker;
-import land.face.outpost.managers.GuildBannerManager;
 import lombok.Getter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.glaremasters.guilds.Guilds;
-import me.glaremasters.guilds.api.GuildsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OutpostPlugin extends JavaPlugin {
 
@@ -38,7 +39,7 @@ public class OutpostPlugin extends JavaPlugin {
   private OutpostManager outpostManager;
   @Getter
   private GuildBannerManager guildBannerManager;
-  private GuildsAPI guildsAPI;
+  private GuildAPI guildAPI;
   private boolean waypointerEnabled;
 
   private MasterConfiguration settings;
@@ -66,7 +67,7 @@ public class OutpostPlugin extends JavaPlugin {
 
     settings = MasterConfiguration.loadFromFiles(configYAML);
 
-    guildsAPI = Guilds.getApi();
+    guildAPI = GuildPlugin.getInstance().getGuildAPI();
     waypointerEnabled = Bukkit.getPluginManager().getPlugin("Waypointer") != null;
 
     outpostManager = new OutpostManager(this);
@@ -117,8 +118,8 @@ public class OutpostPlugin extends JavaPlugin {
     return settings;
   }
 
-  public GuildsAPI getGuildsAPI() {
-    return guildsAPI;
+  public GuildAPI getGuildAPI() {
+    return guildAPI;
   }
 
   public boolean isWaypointerEnabled() {

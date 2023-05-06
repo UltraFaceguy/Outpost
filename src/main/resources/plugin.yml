@@ -6,7 +6,7 @@ description: Make sum outposts
 depend:
   - Facecore
   - Strife
-  - Guilds
+  - PoggersGuilds
 softdepend:
   - Waypointer
   - PlaceholderAPI

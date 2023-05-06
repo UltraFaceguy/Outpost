@@ -1,5 +1,6 @@
 package land.face.outpost.managers;
 
+import com.soujah.poggersguilds.data.Guild;
 import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonElement;
@@ -15,7 +16,6 @@ import java.util.UUID;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.BannerData;
 import land.face.outpost.util.BannerUtil;
-import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -112,7 +112,7 @@ public class GuildBannerManager {
       List<BannerData> data = new ArrayList<>();
       for (Entry<UUID, String> entry : bannerCodeByGuildID.entrySet()) {
         BannerData data1 = new BannerData();
-        data1.setUuid(entry.getKey().toString());
+        data1.setId(entry.getKey());
         data1.setBannerCode(entry.getValue());
         data.add(data1);
       }
@@ -131,7 +131,7 @@ public class GuildBannerManager {
         data.add(gson.fromJson(e, BannerData.class));
       }
       for (BannerData bd : data) {
-        bannerCodeByGuildID.put(UUID.fromString(bd.getUuid()), bd.getBannerCode());
+        bannerCodeByGuildID.put(bd.getId(), bd.getBannerCode());
       }
     } catch (IOException e) {
       e.printStackTrace();

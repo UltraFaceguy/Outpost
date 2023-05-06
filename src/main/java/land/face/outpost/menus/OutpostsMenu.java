@@ -18,22 +18,23 @@
  */
 package land.face.outpost.menus;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.soujah.poggersguilds.api.GuildAPI;
+import com.soujah.poggersguilds.data.Guild;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.menus.icons.OutpostIcon;
-import me.glaremasters.guilds.Guilds;
-import me.glaremasters.guilds.api.GuildsAPI;
-import me.glaremasters.guilds.guild.Guild;
 import ninja.amp.ampmenus.menus.ItemMenu;
 import org.bukkit.entity.Player;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class OutpostsMenu extends ItemMenu {
 
   private static OutpostsMenu instance;
+  private final OutpostPlugin plugin;
   private Map<Player, Guild> guildCache = new HashMap<>();
-  private GuildsAPI guildsAPI = Guilds.getApi();
+  private GuildAPI guildsAPI;
 
   public OutpostsMenu(OutpostPlugin plugin) {
     super("Outposts", Size.fit(56), plugin);
@@ -42,17 +43,19 @@ public class OutpostsMenu extends ItemMenu {
       setItem(slot, new OutpostIcon(o));
       slot++;
     }
+    this.plugin = plugin;
+    this.guildsAPI = plugin.getGuildAPI();
   }
 
   @Override
   public void open(Player player) {
-    guildCache.put(player, guildsAPI.getGuild(player));
+    guildCache.put(player, guildsAPI.getGuildFromPlayer(player));
     super.open(player);
   }
 
   @Override
   public void update(Player player) {
-    guildCache.put(player, guildsAPI.getGuild(player));
+    guildCache.put(player, guildsAPI.getGuildFromPlayer(player));
     super.update(player);
   }
 

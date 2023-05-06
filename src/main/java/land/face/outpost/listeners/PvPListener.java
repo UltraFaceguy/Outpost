@@ -1,30 +1,26 @@
 package land.face.outpost.listeners;
 
-import java.util.UUID;
+import com.soujah.poggersguilds.api.GuildAPI;
+import com.soujah.poggersguilds.data.Guild;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Position;
-import me.glaremasters.guilds.Guilds;
-import me.glaremasters.guilds.api.GuildsAPI;
-import me.glaremasters.guilds.guild.Guild;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EvokerFangs;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
+import java.util.UUID;
+
 public class PvPListener implements Listener {
 
   private OutpostPlugin plugin;
-  private GuildsAPI guildsAPI;
+  private GuildAPI guildAPI;
 
   public PvPListener(OutpostPlugin plugin) {
     this.plugin = plugin;
-    guildsAPI = Guilds.getApi();
+    guildAPI = plugin.getGuildAPI();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -36,19 +32,19 @@ public class PvPListener implements Listener {
     if (!(attacker instanceof Player)) {
       return;
     }
-    Guild defendGuild = guildsAPI.getGuild((Player) event.getEntity());
+    Guild defendGuild = guildAPI.getGuildFromPlayer((Player) event.getEntity());
     if (defendGuild == null) {
       return;
     }
-    Guild attackGuild = guildsAPI.getGuild((Player) attacker);
+    Guild attackGuild = guildAPI.getGuildFromPlayer((Player) attacker);
     if (attackGuild == null) {
       return;
     }
-    for (UUID uuid : defendGuild.getAllies()) {
-      if (uuid.equals(attackGuild.getId())) {
-        return;
-      }
-    }
+//    for (UUID uuid : defendGuild.getAllies()) {
+//      if (uuid.equals(attackGuild.getId())) {
+//        return;
+//      }
+//    }
     for (Outpost o : plugin.getOutpostManager().getOutposts()) {
       if (Position.isWithin(o, event.getEntity().getLocation(), o.getPvpPos1(), o.getPvpPos2())) {
         if (Position.isWithin(o, attacker.getLocation(), o.getPvpPos1(), o.getPvpPos2())) {
