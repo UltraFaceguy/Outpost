@@ -16,6 +16,7 @@ import land.face.outpost.managers.OutpostManager;
 import land.face.outpost.menus.OutpostsMenu;
 import land.face.outpost.tasks.OutpostCaptureTicker;
 import land.face.outpost.tasks.OutpostPayoutTicker;
+import land.face.strife.StrifePlugin;
 import lombok.Getter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
@@ -41,6 +42,8 @@ public class OutpostPlugin extends JavaPlugin {
   private GuildBannerManager guildBannerManager;
   private GuildAPI guildAPI;
   private boolean waypointerEnabled;
+
+  private StrifePlugin strifePlugin;
 
   private MasterConfiguration settings;
   private VersionedSmartYamlConfiguration configYAML;
@@ -72,6 +75,7 @@ public class OutpostPlugin extends JavaPlugin {
 
     outpostManager = new OutpostManager(this);
     guildBannerManager = new GuildBannerManager(this);
+    strifePlugin = StrifePlugin.getInstance();
 
     Bukkit.getPluginManager().registerEvents(new GuildListener(this), this);
     Bukkit.getPluginManager().registerEvents(new GuildAlliedMobListener(this), this);
@@ -144,5 +148,9 @@ public class OutpostPlugin extends JavaPlugin {
       }
       outpostManager.getUniqueIdToOutpost().put(unique, outpostId);
     }
+  }
+
+  public StrifePlugin getStrifePlugin(){
+    return strifePlugin == null ? null : strifePlugin;
   }
 }

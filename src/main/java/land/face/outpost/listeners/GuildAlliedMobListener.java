@@ -49,7 +49,7 @@ public class GuildAlliedMobListener implements Listener {
         uniqueIds.add(uniqueId);
       }
     }
-    for (StrifeMob mob : StrifePlugin.getInstance().getStrifeMobManager().getMobs().values()) {
+    for (StrifeMob mob : plugin.getStrifePlugin().getStrifeMobManager().getMobs().values()) {
       if (uniqueIds.contains(mob.getUniqueEntityId())) {
         mob.setAlliedGuild(event.getOutpost().getGuild().getId());
         if (mob.getEntity() instanceof Mob) {

@@ -5,11 +5,11 @@ author: Faceguy
 description: Make sum outposts
 depend:
   - Facecore
-  - Strife
   - PoggersGuilds
 softdepend:
   - Waypointer
   - PlaceholderAPI
+  - Strife
 api-version: 1.16
 
 commands:

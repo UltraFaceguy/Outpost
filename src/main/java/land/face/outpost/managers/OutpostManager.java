@@ -21,7 +21,6 @@ import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Outpost.OutpostState;
 import land.face.outpost.data.Position;
 import land.face.outpost.events.OutpostCaptureEvent;
-import land.face.strife.StrifePlugin;
 import land.face.strife.data.Spawner;
 import land.face.strife.data.StrifeMob;
 import land.face.strife.data.UniqueEntity;
@@ -239,8 +238,8 @@ public class OutpostManager {
     }
 
     for (Player p : playersOnOutpost) {
-      StrifePlugin.getInstance().getBossBarManager().updateBar(p, 2, 2, o.getTitleBar(), 30);
-      StrifePlugin.getInstance().getBossBarManager().updateBar(p, 3, 2, s, 30);
+      plugin.getStrifePlugin().getBossBarManager().updateBar(p, 2, 2, o.getTitleBar(), 30);
+      plugin.getStrifePlugin().getBossBarManager().updateBar(p, 3, 2, s, 30);
     }
   }
 
@@ -276,10 +275,10 @@ public class OutpostManager {
     Bukkit.getPluginManager().callEvent(event);
 
     for (String s : outpost.getSpawnerIds()) {
-      Spawner spawner = StrifePlugin.getInstance().getSpawnerManager().getSpawnerMap().get(s);
+      Spawner spawner = plugin.getStrifePlugin().getSpawnerManager().getSpawnerMap().get(s);
       UniqueEntity ue = spawner.getUniqueEntity();
       for (LivingEntity le : spawner.getEntities()) {
-        StrifeMob mob = StrifePlugin.getInstance().getStrifeMobManager().getMobs().get(le);
+        StrifeMob mob = plugin.getStrifePlugin().getStrifeMobManager().getMobs().get(le);
         mob.setAlliedGuild(newGuild.getId());
         if (le instanceof Mob) {
           ((Mob) le).setTarget(null);

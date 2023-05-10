@@ -4,6 +4,7 @@ import com.soujah.poggersguilds.events.GuildLeaveEvent;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -21,7 +22,8 @@ public class GuildListener implements Listener {
     if (event.isCancelled()) {
       return;
     }
-    if (plugin.getGuildAPI().doesGuildExists(plugin.getGuildAPI().getGuildFromPlayer(event.getPlayer()).getId())){
+
+    if (!plugin.getGuildAPI().getGuildMaster(event.getGuildID()).equals(event.getPlayer().getUniqueId())){
       return;
     }
     for (String outpostId : plugin.getOutpostManager().getOutpostIds()) {
