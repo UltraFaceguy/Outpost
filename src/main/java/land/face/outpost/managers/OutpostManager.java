@@ -288,7 +288,7 @@ public class OutpostManager {
         le.setCustomName(ChatColor.GOLD + "[" + newGuild.getGuildTag() + "] " + ue.getName());
       }
     }
-    plugin.getGuildBannerManager().setGuildBannersInArea(newGuild, 32, outpost.getCenterLocation());
+    plugin.getGuildBannerManager().setBannersInArea(outpost.getCenterLocation(), 32, newGuild.getBanner());
     for (Player p : capturers) {
       TitleUtils.sendTitle(p, FaceColor.ORANGE.shaded(ShaderStyle.SHAKE) + "Outpost Captured!",
           FaceColor.BROWN.shaded(ShaderStyle.BOUNCE) + "Hollah Hollah Get Dollah", 100, 10, 10);

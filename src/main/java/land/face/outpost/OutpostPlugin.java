@@ -84,7 +84,6 @@ public class OutpostPlugin extends JavaPlugin {
     //Bukkit.getPluginManager().registerEvents(new PvPListener(this), this);
 
     outpostManager.loadOutposts();
-    guildBannerManager.loadGuildBanners();
 
     loadOutpostUniques(configYAML);
 
@@ -111,7 +110,6 @@ public class OutpostPlugin extends JavaPlugin {
 
   public void onDisable() {
     outpostManager.saveOutposts();
-    guildBannerManager.saveGuildBanners();
     outpostPlaceholder.unregister();
     HandlerList.unregisterAll(this);
     Bukkit.getServer().getScheduler().cancelTasks(this);
