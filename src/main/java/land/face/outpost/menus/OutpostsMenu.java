@@ -49,13 +49,13 @@ public class OutpostsMenu extends ItemMenu {
 
   @Override
   public void open(Player player) {
-    guildCache.put(player, guildsAPI.getGuildFromPlayer(player));
+    guildCache.put(player, guildsAPI.getOnlineGuildFromPlayer(player));
     super.open(player);
   }
 
   @Override
   public void update(Player player) {
-    guildCache.put(player, guildsAPI.getGuildFromPlayer(player));
+    guildCache.put(player, guildsAPI.getOnlineGuildFromPlayer(player));
     super.update(player);
   }
 

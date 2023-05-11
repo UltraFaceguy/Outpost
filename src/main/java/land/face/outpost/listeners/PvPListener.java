@@ -32,11 +32,11 @@ public class PvPListener implements Listener {
     if (!(attacker instanceof Player)) {
       return;
     }
-    Guild defendGuild = guildAPI.getGuildFromPlayer((Player) event.getEntity());
+    Guild defendGuild = guildAPI.getOnlineGuildFromPlayer((Player) event.getEntity());
     if (defendGuild == null) {
       return;
     }
-    Guild attackGuild = guildAPI.getGuildFromPlayer((Player) attacker);
+    Guild attackGuild = guildAPI.getOnlineGuildFromPlayer((Player) attacker);
     if (attackGuild == null) {
       return;
     }

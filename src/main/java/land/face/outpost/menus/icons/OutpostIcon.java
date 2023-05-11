@@ -53,7 +53,7 @@ public class OutpostIcon extends MenuItem {
   public ItemStack getFinalIcon(Player player) {
     ItemStack stack = new ItemStack(Material.PAPER);
     ItemStackExtensionsKt.setDisplayName(stack, ChatColor.RED + outpost.getName());
-    Guild guild = OutpostPlugin.getInstance().getGuildAPI().getGuildFromPlayer(player);
+    Guild guild = OutpostPlugin.getInstance().getGuildAPI().getOnlineGuildFromPlayer(player);
     switch (outpost.getState()) {
       case OPEN:
         ItemStackExtensionsKt.setCustomModelData(stack, 10000);
@@ -101,7 +101,7 @@ public class OutpostIcon extends MenuItem {
             .setWaypoint(event.getPlayer(), outpost.getWaypoint());
       }
     } else if (event.getClickType() == ClickType.LEFT) {
-      Guild guild = OutpostPlugin.getInstance().getGuildAPI().getGuildFromPlayer(event.getPlayer());
+      Guild guild = OutpostPlugin.getInstance().getGuildAPI().getOnlineGuildFromPlayer(event.getPlayer());
       if (guild == null) {
         MessageUtils.sendMessage(event.getPlayer(), "&eYou cannot rally without a guild...");
       } else if (outpost.getGuild() != guild) {

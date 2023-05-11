@@ -117,7 +117,7 @@ public class OutpostManager {
     for (Guild guild : earnings.keySet()) {
 
       double balance = guild.getGuildBalance();
-      double maxBalance = plugin.getGuildAPI().getGuildTierMaxBank(guild.getId());
+      double maxBalance = plugin.getGuildAPI().getGuildMaxBank(guild.getId());
 
       int cash = (int) Math.ceil(earnings.get(guild));
       boolean wasAlreadyFull = balance == maxBalance;
@@ -176,7 +176,7 @@ public class OutpostManager {
         }
       }
       if (o.getGuild() != null && ticks % 200 == 0) {
-        for (GuildMember p : plugin.getGuildAPI().getOnlineGuildMembers(o.getGuild())) {
+        for (GuildMember p : plugin.getGuildAPI().getOnlineGuildMembers(o.getGuild().getId())) {
           MessageUtils.sendMessage(Bukkit.getPlayer(p.getPlayerID()), attackMsg.replace("{name}", o.getName()));
         }
       }
@@ -202,7 +202,7 @@ public class OutpostManager {
     }
 
     if (o.getGuild() != null && ticks % 200 == 0) {
-      for (GuildMember p : plugin.getGuildAPI().getOnlineGuildMembers(o.getGuild())) {
+      for (GuildMember p : plugin.getGuildAPI().getOnlineGuildMembers(o.getGuild().getId())) {
         MessageUtils.sendMessage(Bukkit.getPlayer(p.getPlayerID()), attackMsg.replace("{name}", o.getName()));
       }
     }
@@ -297,7 +297,7 @@ public class OutpostManager {
   }
 
   public void dmGuildMembers(Guild guild, String message) {
-    List<UUID> guildMembers = plugin.getGuildAPI().getOnlineGuildMembers(guild).stream().map(GuildMember::getPlayerID).toList();
+    List<UUID> guildMembers = plugin.getGuildAPI().getOnlineGuildMembers(guild.getId()).stream().map(GuildMember::getPlayerID).toList();
     for (UUID uuid : guildMembers) {
       String id = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(uuid);
       if (StringUtils.isBlank(id)) {
@@ -312,7 +312,7 @@ public class OutpostManager {
   }
 
   public void informPayout(Guild guild, int amount, boolean capped, boolean alert) {
-    List<GuildMember> members = plugin.getGuildAPI().getOnlineGuildMembers(guild);
+    List<GuildMember> members = plugin.getGuildAPI().getOnlineGuildMembers(guild.getId());
     String message;
     if (capped) {
       message = cappedDepositMsg
@@ -360,7 +360,7 @@ public class OutpostManager {
   public Map<Guild, Integer> getGuildsOnOutpost(Outpost outpost, Set<Player> players) {
     Map<Guild, Integer> capPlayerCount = new HashMap<>();
     for (Player p : players) {
-      Guild guild = plugin.getGuildAPI().getGuildFromPlayer(p);
+      Guild guild = plugin.getGuildAPI().getOnlineGuildFromPlayer(p);
       if (guild == null) {
         continue;
       }
@@ -390,7 +390,7 @@ public class OutpostManager {
       for (JsonElement e : array) {
         Outpost outpost = gson.fromJson(e, Outpost.class);
         if (outpost.getGuildId() != null) {
-          outpost.setGuild(plugin.getGuildAPI().getGuildFromId(outpost.getGuildId()));
+          outpost.setGuild(plugin.getGuildAPI().getGuildFromID(outpost.getGuildId()));
         } else {
           outpost.setGuild(null);
         }

@@ -38,7 +38,7 @@ public class OutpostPlaceholders extends PlaceholderExpansion {
       return outpost.getGuild().getGuildName();
     }
     if (placeholder.startsWith("owned")) {
-      Guild guild = OutpostPlugin.getInstance().getGuildAPI().getGuildFromPlayer(p);
+      Guild guild = OutpostPlugin.getInstance().getGuildAPI().getOnlineGuildFromPlayer(p);
       if (guild == null) {
         return "0";
       }
@@ -51,7 +51,7 @@ public class OutpostPlaceholders extends PlaceholderExpansion {
       return Integer.toString(count);
     }
     if (placeholder.startsWith("income")) {
-      Guild guild = OutpostPlugin.getInstance().getGuildAPI().getGuildFromPlayer(p);
+      Guild guild = OutpostPlugin.getInstance().getGuildAPI().getOnlineGuildFromPlayer(p);
       if (guild == null) {
         return "0";
       }

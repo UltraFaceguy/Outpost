@@ -86,7 +86,7 @@ public class CashDropListener implements Listener {
       return;
     }
 
-    Guild killerGuild = event.getKiller() == null ? null : plugin.getGuildAPI().getGuildFromPlayer(event.getKiller());
+    Guild killerGuild = event.getKiller() == null ? null : plugin.getGuildAPI().getOnlineGuildFromPlayer(event.getKiller());
     boolean isKillerMember = killerGuild != null && killerGuild == outpost.getGuild();
 
     if (isKillerMember) {
