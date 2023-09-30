@@ -1,10 +1,10 @@
 package land.face.outpost.listeners;
 
+import com.soujah.poggersguilds.events.GuildLeaveEvent;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
-import me.glaremasters.guilds.api.events.GuildLeaveEvent;
-import me.glaremasters.guilds.api.events.GuildRenameEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -19,10 +19,7 @@ public class GuildListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onGuildAbandon(final GuildLeaveEvent event) {
-    if (event.isCancelled()) {
-      return;
-    }
-    if (!event.getGuild().getGuildMaster().getUuid().equals(event.getPlayer().getUniqueId())) {
+    if (!event.getGuild().isOwner((Player) event.getPlayer())) {
       return;
     }
     for (String outpostId : plugin.getOutpostManager().getOutpostIds()) {
@@ -35,16 +32,4 @@ public class GuildListener implements Listener {
       }
     }
   }
-
-  @EventHandler
-  public void onGuildRename(final GuildRenameEvent event) {
-    if (event.isCancelled()) {
-      return;
-    }
-    //if (!event.getPlayer() has gems){
-    //  event.setCancelled(true);
-    //  MessageUtils.sendMessage(event.getPlayer(), "&eYou don't have enough &dFaceGems &eto do this!");
-    //}
-  }
-
 }

@@ -1,11 +1,10 @@
 package land.face.outpost.data;
 
+import com.soujah.poggersguilds.data.Guild;
 import java.util.Set;
 
-import land.face.outpost.OutpostPlugin;
 import lombok.Getter;
 import lombok.Setter;
-import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

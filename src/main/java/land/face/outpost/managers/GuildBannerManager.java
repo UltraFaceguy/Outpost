@@ -1,21 +1,9 @@
 package land.face.outpost.managers;
 
-import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
-import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
-import com.tealcube.minecraft.bukkit.shade.google.gson.JsonElement;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import com.soujah.poggersguilds.data.Guild;
+import com.soujah.poggersguilds.util.BannerUtil;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-import land.face.outpost.OutpostPlugin;
-import land.face.outpost.data.BannerData;
-import land.face.outpost.util.BannerUtil;
-import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -31,17 +19,8 @@ import org.bukkit.inventory.meta.BannerMeta;
 
 public class GuildBannerManager {
 
-  private final OutpostPlugin plugin;
-  private final Gson gson = new Gson();
-
-  public GuildBannerManager(OutpostPlugin plugin) {
-    this.plugin = plugin;
-  }
-
-  private final Map<UUID, String> bannerCodeByGuildID = new HashMap<>();
-
   public void setGuildBannersInArea(Guild guild, int borderSize, Location center) {
-    setBannersInArea(center, borderSize, bannerCodeByGuildID.get(guild.getId()));
+    setBannersInArea(center, borderSize, guild.getBanner());
   }
 
   public void setBannersInArea(Location center, int size, String code) {
@@ -100,41 +79,6 @@ public class GuildBannerManager {
         ((Directional) data).setFacing(direction);
         block.setBlockData(data);
       }
-    }
-  }
-
-  public void setGuildBannerCode(Guild guild, String bannerCode) {
-    bannerCodeByGuildID.put(guild.getId(), bannerCode);
-  }
-
-  public void saveGuildBanners() {
-    try (FileWriter writer = new FileWriter(plugin.getDataFolder() + "/banners.json")) {
-      List<BannerData> data = new ArrayList<>();
-      for (Entry<UUID, String> entry : bannerCodeByGuildID.entrySet()) {
-        BannerData data1 = new BannerData();
-        data1.setUuid(entry.getKey().toString());
-        data1.setBannerCode(entry.getValue());
-        data.add(data1);
-      }
-      gson.toJson(data, writer);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public void loadGuildBanners() {
-    bannerCodeByGuildID.clear();
-    try (FileReader reader = new FileReader(plugin.getDataFolder() + "/banners.json")) {
-      JsonArray array = gson.fromJson(reader, JsonArray.class);
-      List<BannerData> data = new ArrayList<>();
-      for (JsonElement e : array) {
-        data.add(gson.fromJson(e, BannerData.class));
-      }
-      for (BannerData bd : data) {
-        bannerCodeByGuildID.put(UUID.fromString(bd.getUuid()), bd.getBannerCode());
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
     }
   }
 }

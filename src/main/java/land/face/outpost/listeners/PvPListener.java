@@ -1,12 +1,9 @@
 package land.face.outpost.listeners;
 
-import java.util.UUID;
+import com.soujah.poggersguilds.data.Guild;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Position;
-import me.glaremasters.guilds.Guilds;
-import me.glaremasters.guilds.api.GuildsAPI;
-import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EvokerFangs;
 import org.bukkit.entity.LivingEntity;
@@ -20,11 +17,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 public class PvPListener implements Listener {
 
   private OutpostPlugin plugin;
-  private GuildsAPI guildsAPI;
 
   public PvPListener(OutpostPlugin plugin) {
     this.plugin = plugin;
-    guildsAPI = Guilds.getApi();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -36,18 +31,13 @@ public class PvPListener implements Listener {
     if (!(attacker instanceof Player)) {
       return;
     }
-    Guild defendGuild = guildsAPI.getGuild((Player) event.getEntity());
+    Guild defendGuild = plugin.getGuildsAPI().getGuild((Player) event.getEntity());
     if (defendGuild == null) {
       return;
     }
-    Guild attackGuild = guildsAPI.getGuild((Player) attacker);
+    Guild attackGuild = plugin.getGuildsAPI().getGuild((Player) attacker);
     if (attackGuild == null) {
       return;
-    }
-    for (UUID uuid : defendGuild.getAllies()) {
-      if (uuid.equals(attackGuild.getId())) {
-        return;
-      }
     }
     for (Outpost o : plugin.getOutpostManager().getOutposts()) {
       if (Position.isWithin(o, event.getEntity().getLocation(), o.getPvpPos1(), o.getPvpPos2())) {

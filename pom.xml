@@ -62,10 +62,6 @@
       <id>sk89q-repo</id>
       <url>https://maven.enginehub.org/repo/</url>
     </repository>
-    <repository>
-      <id>glares-repo</id>
-      <url>https://repo.glaremasters.me/repository/public/</url>
-    </repository>
   </repositories>
 
   <dependencies>
@@ -88,13 +84,13 @@
     <dependency>
       <groupId>io.pixeloutlaw</groupId>
       <artifactId>strife</artifactId>
-      <version>3.10.0</version>
+      <version>3.10.4</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>me.glaremasters</groupId>
-      <artifactId>guilds</artifactId>
-      <version>3.5.4.9</version>
+      <groupId>io.pixeloutlaw</groupId>
+      <artifactId>poggers-guilds</artifactId>
+      <version>1.0.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

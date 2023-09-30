@@ -18,6 +18,8 @@
  */
 package land.face.outpost.menus.icons;
 
+import com.soujah.poggersguilds.data.Guild;
+import com.tealcube.minecraft.bukkit.facecore.utilities.FaceColor;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.TextUtils;
 import com.tealcube.minecraft.bukkit.shade.apache.commons.lang.WordUtils;
@@ -30,10 +32,8 @@ import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Outpost.OutpostState;
 import land.face.waypointer.WaypointerPlugin;
-import me.glaremasters.guilds.guild.Guild;
 import ninja.amp.ampmenus.events.ItemClickEvent;
 import ninja.amp.ampmenus.items.MenuItem;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -51,21 +51,13 @@ public class OutpostIcon extends MenuItem {
   @Override
   public ItemStack getFinalIcon(Player player) {
     ItemStack stack = new ItemStack(Material.PAPER);
-    ItemStackExtensionsKt.setDisplayName(stack, ChatColor.RED + outpost.getName());
+    ItemStackExtensionsKt.setDisplayName(stack, FaceColor.RED + outpost.getName());
     Guild guild = OutpostPlugin.getInstance().getGuildsAPI().getGuild(player);
     switch (outpost.getState()) {
-      case OPEN:
-        ItemStackExtensionsKt.setCustomModelData(stack, 10000);
-        break;
-      case CONTESTED:
-        ItemStackExtensionsKt.setCustomModelData(stack, 10001);
-        break;
-      case DEFENDED:
-        ItemStackExtensionsKt.setCustomModelData(stack, 10002);
-        break;
-      case PROTECTED:
-        ItemStackExtensionsKt.setCustomModelData(stack, 10003);
-        break;
+      case OPEN -> ItemStackExtensionsKt.setCustomModelData(stack, 10000);
+      case CONTESTED -> ItemStackExtensionsKt.setCustomModelData(stack, 10001);
+      case DEFENDED -> ItemStackExtensionsKt.setCustomModelData(stack, 10002);
+      case PROTECTED -> ItemStackExtensionsKt.setCustomModelData(stack, 10003);
     }
     List<String> lore = new ArrayList<>();
     lore.add("&fOutpost Status: &e" + WordUtils.capitalize(outpost.getState().toString()));
@@ -94,10 +86,8 @@ public class OutpostIcon extends MenuItem {
   public void onItemClick(ItemClickEvent event) {
     super.onItemClick(event);
     if (event.getClickType() == ClickType.RIGHT) {
-      if (OutpostPlugin.getInstance().isWaypointerEnabled() && StringUtils
-          .isNotBlank(outpost.getWaypoint())) {
-        WaypointerPlugin.getInstance().getWaypointManager()
-            .setWaypoint(event.getPlayer(), outpost.getWaypoint());
+      if (OutpostPlugin.getInstance().isWaypointerEnabled() && StringUtils.isNotBlank(outpost.getWaypoint())) {
+        WaypointerPlugin.getInstance().getWaypointManager().setWaypoint(event.getPlayer(), outpost.getWaypoint());
       }
     } else if (event.getClickType() == ClickType.LEFT) {
       Guild guild = OutpostPlugin.getInstance().getGuildsAPI().getGuild(event.getPlayer());

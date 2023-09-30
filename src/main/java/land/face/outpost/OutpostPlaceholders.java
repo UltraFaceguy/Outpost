@@ -1,9 +1,9 @@
 package land.face.outpost;
 
+import com.soujah.poggersguilds.data.Guild;
 import com.tealcube.minecraft.bukkit.shade.apache.commons.lang3.StringUtils;
 import land.face.outpost.data.Outpost;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.glaremasters.guilds.guild.Guild;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

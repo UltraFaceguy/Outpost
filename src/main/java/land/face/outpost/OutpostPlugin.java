@@ -1,5 +1,7 @@
 package land.face.outpost;
 
+import com.soujah.poggersguilds.GuildPlugin;
+import com.soujah.poggersguilds.api.GuildAPI;
 import com.tealcube.minecraft.bukkit.shade.acf.PaperCommandManager;
 import io.pixeloutlaw.minecraft.spigot.config.MasterConfiguration;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedConfiguration;
@@ -20,8 +22,6 @@ import land.face.outpost.tasks.OutpostPayoutTicker;
 import land.face.outpost.managers.GuildBannerManager;
 import lombok.Getter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.glaremasters.guilds.Guilds;
-import me.glaremasters.guilds.api.GuildsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.HandlerList;
@@ -38,7 +38,10 @@ public class OutpostPlugin extends JavaPlugin {
   private OutpostManager outpostManager;
   @Getter
   private GuildBannerManager guildBannerManager;
-  private GuildsAPI guildsAPI;
+  @Getter
+  private GuildAPI guildsAPI;
+  @Getter
+  private GuildPlugin guildPlugin;
   private boolean waypointerEnabled;
 
   private MasterConfiguration settings;
@@ -66,11 +69,12 @@ public class OutpostPlugin extends JavaPlugin {
 
     settings = MasterConfiguration.loadFromFiles(configYAML);
 
-    guildsAPI = Guilds.getApi();
+    guildPlugin = GuildPlugin.getInstance();
+    guildsAPI = guildPlugin.getGuildAPI();
     waypointerEnabled = Bukkit.getPluginManager().getPlugin("Waypointer") != null;
 
     outpostManager = new OutpostManager(this);
-    guildBannerManager = new GuildBannerManager(this);
+    guildBannerManager = new GuildBannerManager();
 
     Bukkit.getPluginManager().registerEvents(new GuildListener(this), this);
     Bukkit.getPluginManager().registerEvents(new GuildAlliedMobListener(this), this);
@@ -79,7 +83,6 @@ public class OutpostPlugin extends JavaPlugin {
     //Bukkit.getPluginManager().registerEvents(new PvPListener(this), this);
 
     outpostManager.loadOutposts();
-    guildBannerManager.loadGuildBanners();
 
     loadOutpostUniques(configYAML);
 
@@ -106,7 +109,6 @@ public class OutpostPlugin extends JavaPlugin {
 
   public void onDisable() {
     outpostManager.saveOutposts();
-    guildBannerManager.saveGuildBanners();
     outpostPlaceholder.unregister();
     HandlerList.unregisterAll(this);
     Bukkit.getServer().getScheduler().cancelTasks(this);
@@ -115,10 +117,6 @@ public class OutpostPlugin extends JavaPlugin {
 
   public MasterConfiguration getSettings() {
     return settings;
-  }
-
-  public GuildsAPI getGuildsAPI() {
-    return guildsAPI;
   }
 
   public boolean isWaypointerEnabled() {
