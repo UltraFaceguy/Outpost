@@ -41,7 +41,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class OutpostIcon extends MenuItem {
 
-  private Outpost outpost;
+  private final Outpost outpost;
 
   public OutpostIcon(Outpost outpost) {
     super("", new ItemStack(Material.AIR));
@@ -52,7 +52,7 @@ public class OutpostIcon extends MenuItem {
   public ItemStack getFinalIcon(Player player) {
     ItemStack stack = new ItemStack(Material.PAPER);
     ItemStackExtensionsKt.setDisplayName(stack, FaceColor.RED + outpost.getName());
-    Guild guild = OutpostPlugin.getInstance().getGuildsAPI().getGuild(player);
+    Guild guild = OutpostPlugin.getInstance().getGuildPlugin().getGuildManager().getGuild(player);
     switch (outpost.getState()) {
       case OPEN -> ItemStackExtensionsKt.setCustomModelData(stack, 10000);
       case CONTESTED -> ItemStackExtensionsKt.setCustomModelData(stack, 10001);
@@ -90,7 +90,7 @@ public class OutpostIcon extends MenuItem {
         WaypointerPlugin.getInstance().getWaypointManager().setWaypoint(event.getPlayer(), outpost.getWaypoint());
       }
     } else if (event.getClickType() == ClickType.LEFT) {
-      Guild guild = OutpostPlugin.getInstance().getGuildsAPI().getGuild(event.getPlayer());
+      Guild guild = OutpostPlugin.getInstance().getGuildPlugin().getGuildManager().getGuild(event.getPlayer());
       if (guild == null) {
         MessageUtils.sendMessage(event.getPlayer(), "&eYou cannot rally without a guild...");
       } else if (outpost.getGuild() != guild) {

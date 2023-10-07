@@ -27,7 +27,6 @@ public class GuildListener implements Listener {
       if (event.getGuild() == outpost.getGuild()) {
         Bukkit.getLogger().info("Outpost " + outpostId + " has been abandoned due to guild disbanding");
         outpost.setGuild(null);
-        outpost.setGuildId(null);
         outpost.setProtectTime(1L);
       }
     }

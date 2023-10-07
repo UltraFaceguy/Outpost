@@ -1,8 +1,9 @@
 package land.face.outpost.data;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter @Setter
 public class BannerData {
   private String uuid;
   private String bannerCode;

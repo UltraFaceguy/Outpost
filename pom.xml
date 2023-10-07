@@ -68,7 +68,7 @@
     <dependency>
       <groupId>io.pixeloutlaw</groupId>
       <artifactId>facecore</artifactId>
-      <version>1.19.4.1</version>
+      <version>1.19.4.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -90,7 +90,7 @@
     <dependency>
       <groupId>io.pixeloutlaw</groupId>
       <artifactId>poggers-guilds</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.6</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

@@ -25,6 +25,7 @@ import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.menus.icons.OutpostIcon;
 import ninja.amp.ampmenus.menus.ItemMenu;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public class OutpostsMenu extends ItemMenu {
@@ -35,9 +36,9 @@ public class OutpostsMenu extends ItemMenu {
   private final Map<Player, Guild> guildCache = new HashMap<>();
 
   public OutpostsMenu(OutpostPlugin plugin) {
-    super("Outposts", Size.fit(56), plugin);
+    super(ChatColor.WHITE + "\uF808抪", Size.FIVE_LINE, plugin);
     this.plugin = plugin;
-    int slot = 0;
+    int slot = 9;
     for (Outpost o : plugin.getOutpostManager().getOutposts()) {
       setItem(slot, new OutpostIcon(o));
       slot++;
@@ -46,13 +47,13 @@ public class OutpostsMenu extends ItemMenu {
 
   @Override
   public void open(Player player) {
-    guildCache.put(player, plugin.getGuildsAPI().getGuild(player));
+    guildCache.put(player, plugin.getGuildPlugin().getGuildManager().getGuild(player));
     super.open(player);
   }
 
   @Override
   public void update(Player player) {
-    guildCache.put(player, plugin.getGuildsAPI().getGuild(player));
+    guildCache.put(player, plugin.getGuildPlugin().getGuildManager().getGuild(player));
     super.update(player);
   }
 

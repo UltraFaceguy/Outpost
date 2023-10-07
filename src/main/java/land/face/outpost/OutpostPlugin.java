@@ -1,7 +1,6 @@
 package land.face.outpost;
 
 import com.soujah.poggersguilds.GuildPlugin;
-import com.soujah.poggersguilds.api.GuildAPI;
 import com.tealcube.minecraft.bukkit.shade.acf.PaperCommandManager;
 import io.pixeloutlaw.minecraft.spigot.config.MasterConfiguration;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedConfiguration;
@@ -39,8 +38,6 @@ public class OutpostPlugin extends JavaPlugin {
   @Getter
   private GuildBannerManager guildBannerManager;
   @Getter
-  private GuildAPI guildsAPI;
-  @Getter
   private GuildPlugin guildPlugin;
   private boolean waypointerEnabled;
 
@@ -70,7 +67,6 @@ public class OutpostPlugin extends JavaPlugin {
     settings = MasterConfiguration.loadFromFiles(configYAML);
 
     guildPlugin = GuildPlugin.getInstance();
-    guildsAPI = guildPlugin.getGuildAPI();
     waypointerEnabled = Bukkit.getPluginManager().getPlugin("Waypointer") != null;
 
     outpostManager = new OutpostManager(this);

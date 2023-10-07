@@ -8,9 +8,14 @@ import com.soujah.poggersguilds.data.GuildMember;
 import com.soujah.poggersguilds.data.GuildTier;
 import com.tealcube.minecraft.bukkit.facecore.utilities.FaceColor;
 import com.tealcube.minecraft.bukkit.facecore.utilities.FaceColor.ShaderStyle;
+import com.tealcube.minecraft.bukkit.facecore.utilities.ItemUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
+import com.tealcube.minecraft.bukkit.facecore.utilities.PaletteUtil;
 import com.tealcube.minecraft.bukkit.facecore.utilities.TextUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.TitleUtils;
+import com.tealcube.minecraft.bukkit.facecore.utilities.ToastUtils;
+import com.tealcube.minecraft.bukkit.facecore.utilities.ToastUtils.ToastStyle;
+import com.tealcube.minecraft.bukkit.facecore.utilities.UnicodeUtil;
 import com.tealcube.minecraft.bukkit.shade.apache.commons.lang3.StringUtils;
 import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
@@ -22,8 +27,13 @@ import github.scarsz.discordsrv.util.DiscordUtil;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import land.face.outpost.OutpostPlugin;
 import land.face.outpost.data.Outpost;
 import land.face.outpost.data.Outpost.OutpostState;
@@ -32,9 +42,11 @@ import land.face.outpost.events.OutpostCaptureEvent;
 import land.face.strife.StrifePlugin;
 import land.face.strife.data.Spawner;
 import land.face.strife.data.StrifeMob;
-import land.face.strife.data.UniqueEntity;
 import land.face.strife.managers.GuiManager;
-import org.bukkit.*;
+import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
@@ -43,10 +55,14 @@ public class OutpostManager {
 
   private final OutpostPlugin plugin;
   private final Map<String, Outpost> outposts = new HashMap<>();
+  @Getter
   private final Map<String, String> uniqueIdToOutpost = new HashMap<>();
   private final Gson gson = new Gson();
 
-  private TextChannel outpostChannel;
+  private final static String OUTPOST_TOAST = FaceColor.NO_SHADOW +
+      UnicodeUtil.unicodePlacehold("<toast_outpost_attack>");
+
+  private final TextChannel outpostChannel;
 
   private final String attackMsg = TextUtils.color(
       "&c[&7Outpost&c] &7Your controlled outpost &c{name} &7is under attack!");
@@ -54,14 +70,14 @@ public class OutpostManager {
       "&c[&7Outpost&c] &7This outpost is contested! Clear out enemy players!");
   private final String captureMsg = TextUtils.color(
       "&c[&7Outpost&c] &7The guild &a{gname} &7has captured &c{oname}&7!");
-  private final String discordCaptureAnnouncement = ":crossed_swords: **{gname} has captured {oname}!**";
-  private final String discordCaptureDM = "**GAMER ALERT!!** Your guild's outpost **{oname}** has been captured by **{gname}**";
-  private final String discordAttackDm = "**GAMER ALERT!!** Your guild's outpost **{oname}** is under attack!";
-  private final String cappedDepositDm = "**GAMER ALERT!!** You have gained funds from owning an outpost but your guild's bank could not contain all of them! Your guild bank is now full. Please login to spend or withdraw some Bits so you can keep raking in that sweet moolah!";
-  private final String normalDepositMsg = TextUtils.color(
-      "&e[&7Outpost&e] &7Your guild bank has been credited &e{amount} Bits &7in earnings from outposts. Total: {total} Bits");
-  private String cappedDepositMsg = TextUtils.color(
-      "&e[&7Outpost&e] &7Your guild bank has been credited &e{amount} Bits &7in earnings from outposts. Your guild bank is now full! Please spend or withdraw funds! Total: {total} Bits");
+  private static final String discordCaptureAnnouncement = ":crossed_swords: **{gname} has captured {oname}!**";
+  private static final String discordCaptureDM = "**GAMER ALERT!!** Your guild's outpost **{oname}** has been captured by **{gname}**";
+  private static final String discordAttackDm = "**GAMER ALERT!!** Your guild's outpost **{oname}** is under attack!";
+  private static final String cappedDepositDm = "**GAMER ALERT!!** You have gained funds from owning an outpost but your guild's bank could not contain all of them! Your guild bank is now full. Please login to spend or withdraw some Bits so you can keep raking in that sweet moolah!";
+  private static final String normalDepositMsg = PaletteUtil.color(
+      "|crimson||b|[|brown||b|Outpost Income|crimson||b|] |yellow|+{amount}◎ |gray|(Sent to guild bank)");
+  private static final String cappedDepositMsg = PaletteUtil.color(
+      "|crimson||b|[|brown||b|Outpost Income|crimson||b|] |yellow|+{amount}◎ |orange|Guild Bank full! Spend or withdraw your funds!");
 
   public OutpostManager(OutpostPlugin plugin) {
     this.plugin = plugin;
@@ -90,7 +106,6 @@ public class OutpostManager {
     outpost.setSpawnerIds(new HashSet<>());
     outpost.setMaxBarrier(750);
     outpost.setMaxLife(1250);
-    outpost.setGuildId(null);
 
     outposts.put(outpost.getId(), outpost);
     return outpost;
@@ -102,7 +117,7 @@ public class OutpostManager {
 
   public void payout(double payoutRatio) {
     Bukkit.getLogger().info("Sending outpost payments...");
-    Map<Guild, Double> earnings = new HashMap<>();
+    Map<UUID, Double> earnings = new HashMap<>();
     for (Outpost o : outposts.values()) {
       if (o.getGuild() == null) {
         continue;
@@ -111,20 +126,20 @@ public class OutpostManager {
       amount += o.getCollectedTaxes();
       o.setCollectedTaxes(0);
       o.setLastPayment((int) amount);
-      earnings.put(o.getGuild(), earnings.getOrDefault(o.getGuild(), 0D) + amount);
+      earnings.put(o.getGuild().getId(), earnings.getOrDefault(o.getGuild().getId(), 0D) + amount);
     }
-    for (Guild guild : earnings.keySet()) {
+    for (UUID uuid : earnings.keySet()) {
+      Guild guild = plugin.getGuildPlugin().getGuildManager().getGuild(uuid);
       GuildTier tier = plugin.getGuildPlugin().getTierManager().getTier(guild.getTier());
 
-      double balance = guild.getBalance();
       double maxBalance = tier.getMaxBank();
 
-      int cash = (int) Math.ceil(earnings.get(guild));
-      boolean wasAlreadyFull = balance == maxBalance;
-      boolean capped = balance + cash >= maxBalance;
-      guild.setBalance((float) Math.min(balance + cash, maxBalance));
+      int gains = (int) Math.ceil(earnings.get(uuid));
+      float remainder = guild.deposit(gains, tier);
+      boolean capped = remainder > 0.1f;
+      boolean wasAlreadyFull = gains == remainder;
 
-      informPayout(guild, cash, capped, capped && !wasAlreadyFull);
+      informPayout(guild, gains, guild.getBalance(), capped, capped && !wasAlreadyFull);
     }
     Bukkit.getLogger().info("Outpost payments complete!");
   }
@@ -133,9 +148,11 @@ public class OutpostManager {
 
     Set<Player> playersOnOutpost = getPlayersOnOutpost(o);
 
+    Guild owningGuild = o.getGuild();
+    String capName = owningGuild == null ? "None" : owningGuild.getName();
+
     if (o.getProtectTime() > System.currentTimeMillis()) {
-      o.setTitleBar(ChatColor.GOLD + "" + ChatColor.BOLD + o.getGuild().getName() +
-          ChatColor.GREEN + "" + ChatColor.BOLD + " PROTECTED");
+      o.setTitleBar(FaceColor.ORANGE.s() + FaceColor.BOLD + capName + FaceColor.GREEN.s() + FaceColor.BOLD + " PROTECTED");
       updateBars(o, playersOnOutpost);
       o.setState(OutpostState.PROTECTED);
       return;
@@ -147,7 +164,7 @@ public class OutpostManager {
       return;
     }
 
-    Map<Guild, Integer> contestingGuilds = getGuildsOnOutpost(o, playersOnOutpost);
+    Map<UUID, Integer> contestingGuilds = getGuildsOnOutpost(playersOnOutpost);
 
     if (contestingGuilds.isEmpty()) {
       o.setBarrier(Math.min(o.getMaxBarrier(), o.getBarrier() + o.getMaxBarrier() / 100));
@@ -155,13 +172,10 @@ public class OutpostManager {
       return;
     }
 
-    Guild owningGuild = o.getGuild();
+    o.setTitleBar(FaceColor.ORANGE.s() + FaceColor.BOLD + capName + FaceColor.WHITE + "  " +
+        INT_FORMAT.format(o.getBarrier()) + "♡ " + FaceColor.RED + INT_FORMAT.format(o.getLife()) + "♡");
 
-    o.setTitleBar(ChatColor.GOLD + "" + ChatColor.BOLD + o.getName() +
-        ChatColor.WHITE + "  " + INT_FORMAT.format(o.getBarrier()) + "♡ " +
-        ChatColor.RED + INT_FORMAT.format(o.getLife()) + "♡");
-
-    boolean isOwnerDefending = o.getGuild() != null && contestingGuilds.containsKey(owningGuild);
+    boolean isOwnerDefending = owningGuild != null && contestingGuilds.containsKey(owningGuild.getId());
 
     if (isOwnerDefending) {
       if (contestingGuilds.size() == 1) {
@@ -176,9 +190,10 @@ public class OutpostManager {
           MessageUtils.sendMessage(p, contestMsg);
         }
       }
-      if (o.getGuild() != null && ticks % 200 == 0) {
+      if (ticks % 200 == 0) {
         for (Player p : o.getGuild().getOnlinePlayers()) {
-          MessageUtils.sendMessage(p, attackMsg.replace("{name}", o.getName()));
+          ToastUtils.sendToast(p, OUTPOST_TOAST, ItemUtils.BLANK, ToastStyle.INFO);
+          //MessageUtils.sendMessage(p, attackMsg.replace("{name}", o.getName()));
         }
       }
       updateBars(o, playersOnOutpost);
@@ -186,9 +201,9 @@ public class OutpostManager {
     }
 
     float damage = 0;
-    for (Guild g : contestingGuilds.keySet()) {
-      if (g != owningGuild) {
-        damage += contestingGuilds.get(g);
+    for (UUID uuid : contestingGuilds.keySet()) {
+      if (owningGuild == null || !uuid.equals(owningGuild.getId())) {
+        damage += contestingGuilds.get(uuid);
       }
     }
     damage = Math.min(damage, 4);
@@ -197,14 +212,14 @@ public class OutpostManager {
     o.setState(OutpostState.CONTESTED);
 
     if (o.getBarrier() / o.getMaxBarrier() < 0.75 && System.currentTimeMillis() > o
-        .getAttackAlertDmCooldown() && o.getGuild() != null) {
-      dmGuildMembers(o.getGuild(), discordAttackDm.replace("{oname}", o.getName()));
+        .getAttackAlertDmCooldown() && owningGuild != null) {
+      dmGuildMembers(owningGuild, discordAttackDm.replace("{oname}", o.getName()));
       o.setAttackAlertDmCooldown(System.currentTimeMillis() + 1500000);
     }
 
-    if (o.getGuild() != null && ticks % 200 == 0) {
+    if (owningGuild != null && ticks % 200 == 0) {
       String msg = attackMsg.replace("{name}", o.getName());
-      for (Player p : o.getGuild().getOnlinePlayers()) {
+      for (Player p : owningGuild.getOnlinePlayers()) {
         MessageUtils.sendMessage(p, msg);
       }
     }
@@ -213,7 +228,7 @@ public class OutpostManager {
       if (contestingGuilds.size() > 1) {
         o.setLife(1);
       } else {
-        Guild capGuild = contestingGuilds.keySet().iterator().next();
+        Guild capGuild = plugin.getGuildPlugin().getGuildManager().getGuild(contestingGuilds.keySet().iterator().next());
         captureOutpost(o, capGuild, playersOnOutpost);
       }
     }
@@ -267,7 +282,6 @@ public class OutpostManager {
     outpost.setProtectTime(System.currentTimeMillis() + protectTime);
     outpost.setAttackAlertDmCooldown(1L);
     outpost.setCanRally(true);
-    outpost.setGuildId(newGuild.getId().toString());
     outpost.setGuild(newGuild);
     outpost.setLife(outpost.getMaxLife());
     outpost.setBarrier(outpost.getMaxBarrier());
@@ -278,16 +292,15 @@ public class OutpostManager {
 
     for (String s : outpost.getSpawnerIds()) {
       Spawner spawner = StrifePlugin.getInstance().getSpawnerManager().getSpawnerMap().get(s);
-      UniqueEntity ue = spawner.getUniqueEntity();
       for (LivingEntity le : spawner.getEntities()) {
-        StrifeMob mob = StrifePlugin.getInstance().getStrifeMobManager().getMobs().get(le);
+        StrifeMob mob = StrifePlugin.getInstance().getStrifeMobManager().getStatMob(le);
         mob.setAlliedGuild(newGuild.getId());
         if (le instanceof Mob) {
           ((Mob) le).setTarget(null);
         }
-        le.getWorld().playSound(le.getLocation(),
-            Sound.ENTITY_EVOKER_PREPARE_WOLOLO, 1, (float) (0.8 + (Math.random() * 0.4)));
-        le.setCustomName(ChatColor.GOLD + "[" + newGuild.getTag() + "] " + ue.getName());
+        le.getWorld().playSound(le.getLocation(), Sound.ENTITY_EVOKER_PREPARE_WOLOLO,
+            1, (float) (0.8 + (Math.random() * 0.4)));
+        //noinspection deprecatied
       }
     }
     plugin.getGuildBannerManager().setGuildBannersInArea(newGuild, 32, outpost.getCenterLocation());
@@ -299,7 +312,7 @@ public class OutpostManager {
   }
 
   public void dmGuildMembers(Guild guild, String message) {
-    List<UUID> guildMembers = guild.getMembers().stream().map(GuildMember::getPlayerID).toList();
+    List<UUID> guildMembers = guild.getMembers().stream().map(GuildMember::getId).toList();
     for (UUID uuid : guildMembers) {
       String id = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(uuid);
       if (StringUtils.isBlank(id)) {
@@ -313,24 +326,24 @@ public class OutpostManager {
     }
   }
 
-  public void informPayout(Guild guild, int amount, boolean capped, boolean alert) {
+  public void informPayout(Guild guild, float amount, float newBalance, boolean capped, boolean alert) {
     List<GuildMember> members = guild.getMembers();
     String message;
     if (capped) {
       message = cappedDepositMsg
-          .replace("{amount}", Integer.toString(amount))
-          .replace("{total}", INT_FORMAT.format(guild.getBalance()));
+          .replace("{amount}", INT_FORMAT.format(amount))
+          .replace("{total}", INT_FORMAT.format(newBalance));
     } else {
       message = normalDepositMsg
-          .replace("{amount}", Integer.toString(amount))
-          .replace("{total}", INT_FORMAT.format(guild.getBalance()));
+          .replace("{amount}", INT_FORMAT.format(amount))
+          .replace("{total}", INT_FORMAT.format(newBalance));
     }
     List<UUID> discordDmUuids = new ArrayList<>();
     for (GuildMember m : members) {
       if (m.getGuildRank().ordinal() <= GuildRank.MEMBER.ordinal()) {
-        discordDmUuids.add(m.getPlayerID());
+        discordDmUuids.add(m.getId());
       }
-      Player player = Bukkit.getPlayer(m.getPlayerID());
+      Player player = Bukkit.getPlayer(m.getId());
       if (player != null && player.isOnline()) {
         MessageUtils.sendMessage(player, message);
       }
@@ -360,20 +373,16 @@ public class OutpostManager {
     return players;
   }
 
-  public Map<Guild, Integer> getGuildsOnOutpost(Outpost outpost, Set<Player> players) {
-    Map<Guild, Integer> capPlayerCount = new HashMap<>();
+  public Map<UUID, Integer> getGuildsOnOutpost(Set<Player> players) {
+    Map<UUID, Integer> capPlayerCount = new HashMap<>();
     for (Player p : players) {
-      Guild guild = plugin.getGuildsAPI().getGuild(p);
+      Guild guild = plugin.getGuildPlugin().getGuildManager().getGuild(p);
       if (guild == null) {
         continue;
       }
-      capPlayerCount.put(guild, capPlayerCount.getOrDefault(guild, 0) + 1);
+      capPlayerCount.put(guild.getId(), capPlayerCount.getOrDefault(guild.getId(), 0) + 1);
     }
     return capPlayerCount;
-  }
-
-  public Map<String, String> getUniqueIdToOutpost() {
-    return uniqueIdToOutpost;
   }
 
   public void saveOutposts() {
@@ -390,7 +399,7 @@ public class OutpostManager {
       for (JsonElement e : array) {
         Outpost outpost = gson.fromJson(e, Outpost.class);
         if (outpost.getGuildId() != null) {
-          outpost.setGuild(plugin.getGuildsAPI().getGuild(UUID.fromString(outpost.getGuildId())));
+          outpost.setGuild(plugin.getGuildPlugin().getGuildManager().getGuild(UUID.fromString(outpost.getGuildId())));
         } else {
           outpost.setGuild(null);
         }

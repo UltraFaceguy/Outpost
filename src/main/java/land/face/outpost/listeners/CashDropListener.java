@@ -82,11 +82,11 @@ public class CashDropListener implements Listener {
       return;
     }
 
-    Guild killerGuild = event.getKiller() == null ? null : plugin.getGuildsAPI().getGuild(event.getKiller());
+    Guild killerGuild = event.getKiller() == null ? null : plugin.getGuildPlugin().getGuildManager().getGuild(event.getKiller());
     boolean isKillerMember = killerGuild != null && killerGuild == outpost.getGuild();
 
     if (isKillerMember) {
-      event.setAmount(event.getAmount() * 1.1);
+      event.setAmount(event.getAmount() * 1.05);
     } else {
       double tax = event.getAmount() * 0.05;
       event.setAmount(event.getAmount() - tax);

@@ -6,15 +6,14 @@ description: Make sum outposts
 depend:
   - Facecore
   - Strife
-  - Guilds
   - PoggersGuilds
 softdepend:
   - Waypointer
   - PlaceholderAPI
-api-version: 1.16
+api-version: 1.18
 
 commands:
   outpost:
     usage: /<command>
-    aliases: [outpostz]
+    aliases: [outposts]
     description: outpostsz
